@@ -1,0 +1,309 @@
+const { query, transaction } = require('../config/database');
+
+// Place Direct Order (Customer) - No Cart, No Payment Info
+const placeOrder = async (req, res, next) => {
+  try {
+    const { items } = req.body; // items = [{ isbn, quantity }, ...]
+    const userId = req.user.userId;
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Order must contain at least one item'
+      });
+    }
+
+    // Use transaction for order placement
+    const orderId = await transaction(async (conn) => {
+      // Calculate total and validate stock for all items
+      let totalAmount = 0;
+      const orderItems = [];
+
+      for (const item of items) {
+        const [books] = await conn.query(
+          'SELECT isbn, price, quantity_in_stock FROM BOOKS WHERE isbn = ?',
+          [item.isbn]
+        );
+
+        if (!books) {
+          throw new Error(`Book ${item.isbn} not found`);
+        }
+
+        if (books.quantity_in_stock < item.quantity) {
+          throw new Error(`Insufficient stock for ${item.isbn}. Available: ${books.quantity_in_stock}`);
+        }
+
+        orderItems.push({
+          isbn: item.isbn,
+          quantity: item.quantity,
+          price: books.price
+        });
+
+        totalAmount += books.price * item.quantity;
+      }
+
+      // Create customer order
+      const [orderResult] = await conn.query(
+        'INSERT INTO CUSTOMER_ORDERS (user_id, total_amount) VALUES (?, ?)',
+        [userId, totalAmount]
+      );
+
+      const newOrderId = orderResult.insertId;
+
+      // Insert order items (triggers will validate and deduct stock)
+      for (const orderItem of orderItems) {
+        await conn.query(
+          `INSERT INTO ORDER_ITEMS (order_id, book_isbn, quantity, price_at_purchase)
+           VALUES (?, ?, ?, ?)`,
+          [newOrderId, orderItem.isbn, orderItem.quantity, orderItem.price]
+        );
+      }
+
+      return newOrderId;
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Order placed successfully',
+      data: {
+        orderId,
+        message: 'Your order has been confirmed'
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// View past orders (Customer)
+const viewPastOrders = async (req, res, next) => {
+  try {
+    const userId = req.user.userId;
+
+    const orders = await query(
+      `SELECT order_id, order_date, total_amount
+       FROM CUSTOMER_ORDERS
+       WHERE user_id = ?
+       ORDER BY order_date DESC`,
+      [userId]
+    );
+
+    res.json({
+      success: true,
+      data: orders
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// View order details (Customer)
+const viewOrderDetails = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const userId = req.user.userId;
+
+    // Verify order belongs to user
+    const orders = await query(
+      'SELECT order_id, order_date, total_amount FROM CUSTOMER_ORDERS WHERE order_id = ? AND user_id = ?',
+      [orderId, userId]
+    );
+
+    if (orders.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found or unauthorized'
+      });
+    }
+
+    // Get order items
+    const items = await query(
+      `SELECT oi.order_item_id, oi.book_isbn, b.title, oi.quantity,
+              oi.price_at_purchase, (oi.quantity * oi.price_at_purchase) AS subtotal
+       FROM ORDER_ITEMS oi
+       JOIN BOOKS b ON oi.book_isbn = b.isbn
+       WHERE oi.order_id = ?`,
+      [orderId]
+    );
+
+    res.json({
+      success: true,
+      data: {
+        order: orders[0],
+        items
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get all customer orders (Admin)
+const getAllOrders = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+
+    const orders = await query(
+      `SELECT co.order_id, co.order_date, co.total_amount,
+              u.username, u.email, u.first_name, u.last_name
+       FROM CUSTOMER_ORDERS co
+       JOIN USERS u ON co.user_id = u.user_id
+       ORDER BY co.order_date DESC
+       LIMIT ? OFFSET ?`,
+      [limit, offset]
+    );
+
+    // Get total count
+    const countResult = await query(
+      'SELECT COUNT(*) AS total FROM CUSTOMER_ORDERS'
+    );
+    const total = countResult[0].total;
+
+    res.json({
+      success: true,
+      data: {
+        orders,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// View publisher orders (Admin)
+const viewPublisherOrders = async (req, res, next) => {
+  try {
+    const status = req.query.status || 'pending';
+
+    const orders = await query(
+      `SELECT po.order_id, po.book_isbn, b.title, p.publisher_name,
+              po.order_quantity, po.order_date, po.status,
+              po.confirmed_date, 
+              u1.username AS confirmed_by,
+              u2.username AS created_by,
+              CASE WHEN po.created_by IS NULL THEN 'Auto-generated' ELSE 'Manual' END AS order_type
+       FROM PUBLISHER_ORDERS po
+       JOIN BOOKS b ON po.book_isbn = b.isbn
+       JOIN PUBLISHERS p ON po.publisher_id = p.publisher_id
+       LEFT JOIN USERS u1 ON po.confirmed_by = u1.user_id
+       LEFT JOIN USERS u2 ON po.created_by = u2.user_id
+       WHERE po.status = ?
+       ORDER BY po.order_date DESC`,
+      [status]
+    );
+
+    res.json({
+      success: true,
+      data: orders
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Confirm publisher order (Admin)
+const confirmPublisherOrder = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const adminUserId = req.user.userId;
+
+    // Verify user is admin
+    if (req.user.userType !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized - Admin privileges required'
+      });
+    }
+
+    // Check if order exists and is pending
+    const orders = await query(
+      'SELECT status FROM PUBLISHER_ORDERS WHERE order_id = ?',
+      [orderId]
+    );
+
+    if (orders.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    if (orders[0].status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'Order is not in pending status'
+      });
+    }
+
+    // Confirm order (trigger will update stock automatically)
+    await query(
+      `UPDATE PUBLISHER_ORDERS
+       SET status = 'confirmed',
+           confirmed_date = NOW(),
+           confirmed_by = ?
+       WHERE order_id = ?`,
+      [adminUserId, orderId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Publisher order confirmed successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Place manual publisher order (Admin)
+const placePublisherOrder = async (req, res, next) => {
+  try {
+    const { book_isbn, order_quantity } = req.body;
+    const adminUserId = req.user.userId;
+
+    // Get book's publisher
+    const books = await query(
+      'SELECT publisher_id FROM BOOKS WHERE isbn = ?',
+      [book_isbn]
+    );
+
+    if (books.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Book not found'
+      });
+    }
+
+    // Create order with created_by tracking
+    await query(
+      `INSERT INTO PUBLISHER_ORDERS 
+       (book_isbn, publisher_id, order_quantity, status, created_by)
+       VALUES (?, ?, ?, 'pending', ?)`,
+      [book_isbn, books[0].publisher_id, order_quantity, adminUserId]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Publisher order placed successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  placeOrder,
+  viewPastOrders,
+  viewOrderDetails,
+  getAllOrders,
+  viewPublisherOrders,
+  confirmPublisherOrder,
+  placePublisherOrder
+};

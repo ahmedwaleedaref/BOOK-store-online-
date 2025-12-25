@@ -1,0 +1,108 @@
+# Bookstore Docker Compose Configuration
+# MySQL + Backend + Frontend + phpMyAdmin
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: bookstore-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-BookstoreDB}
+      MYSQL_USER: ${DB_USER:-bookstore}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-bookstore123}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./backend/bookstore.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    networks:
+      - bookstore-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/Dockerfile.backend
+    container_name: bookstore-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: mysql
+      DB_USER: ${DB_USER:-bookstore}
+      DB_PASSWORD: ${DB_PASSWORD:-bookstore123}
+      DB_NAME: ${DB_NAME:-BookstoreDB}
+      DB_PORT: 3306
+      JWT_SECRET: ${JWT_SECRET:-318bd9f87e75fa1fe5b980b5d1a9d8f3450bcb87598f38e9eb0252341632931a1d9634f4582f780c3afcfd283edd175c2fd2bba7c9a48586ce18e47236ff7f24}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-10}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    networks:
+      - bookstore-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/Dockerfile.frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api}
+    container_name: bookstore-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    networks:
+      - bookstore-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # phpMyAdmin (Database Management UI)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: bookstore-phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+    ports:
+      - "${PHPMYADMIN_PORT:-8081}:80"
+    networks:
+      - bookstore-network
+
+networks:
+  bookstore-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local

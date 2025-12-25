@@ -1,0 +1,43 @@
+const express = require('express');
+const router = express.Router();
+const authController = require('../controllers/authController');
+const { authenticateToken } = require('../middleware/auth');
+const { validateRegistration, validateLogin } = require('../middleware/validation');
+const { body } = require('express-validator');
+
+// Public routes
+router.post('/register', validateRegistration, authController.register);
+router.post('/login', validateLogin, authController.login);
+
+// Protected routes (require authentication)
+router.get('/profile', authenticateToken, authController.getProfile);
+
+router.put(
+  '/profile',
+  authenticateToken,
+  [
+    body('first_name').optional().trim().isLength({ max: 50 }),
+    body('last_name').optional().trim().isLength({ max: 50 }),
+    body('email').optional().trim().isEmail().normalizeEmail(),
+    body('phone_number').optional().trim()
+  ],
+  authController.updateProfile
+);
+
+router.put(
+  '/change-password',
+  authenticateToken,
+  [
+    body('current_password').notEmpty().withMessage('Current password is required'),
+    body('new_password')
+      .isLength({ min: 8 })
+      .withMessage('New password must be at least 8 characters')
+      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+      .withMessage('New password must contain uppercase, lowercase, and number')
+  ],
+  authController.changePassword
+);
+
+router.post('/logout', authenticateToken, authController.logout);
+
+module.exports = router;
