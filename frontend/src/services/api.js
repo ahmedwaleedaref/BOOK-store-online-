@@ -26,6 +26,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
+      localStorage.removeItem('cart')
       window.location.href = '/login'
     }
     return Promise.reject(error)
@@ -37,6 +38,7 @@ export const authAPI = {
   login: (data) => api.post('/auth/login', data),
   getProfile: () => api.get('/auth/profile'),
   updateProfile: (data) => api.put('/auth/profile', data),
+  changePassword: (data) => api.put('/auth/change-password', data),
   logout: () => api.post('/auth/logout')
 }
 

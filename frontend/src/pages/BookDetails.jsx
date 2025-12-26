@@ -1,11 +1,16 @@
 import React from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from 'react-query'
 import { booksAPI } from '../services/api'
 import Loading from '../components/Loading'
+import { useAuth } from '../context/AuthContext'
+import { useCart } from '../context/CartContext'
 
 const BookDetails = () => {
   const { isbn } = useParams()
+  const navigate = useNavigate()
+  const { isAuthenticated, isCustomer } = useAuth()
+  const { addToCart } = useCart()
 
   const {
     data,
@@ -87,13 +92,29 @@ const BookDetails = () => {
         </div>
 
         <div className="mt-6 flex gap-3">
-          <Link
-            to="/place-order"
-            state={{ preselectIsbn: book.isbn }}
-            className="btn btn-primary"
-          >
-            Place Order
-          </Link>
+          {isAuthenticated && isCustomer ? (
+            <>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => addToCart(book.isbn, 1)}
+              >
+                Add to Cart
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => {
+                  addToCart(book.isbn, 1)
+                  navigate('/cart')
+                }}
+              >
+                Go to Cart
+              </button>
+            </>
+          ) : (
+            <Link to="/login" className="btn btn-primary">Login to buy</Link>
+          )}
           <Link to="/books" className="btn btn-secondary">Back</Link>
         </div>
       </div>

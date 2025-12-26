@@ -1,14 +1,27 @@
 const { query, transaction } = require('../config/database');
+const { validateCard } = require('../utils/creditCard');
 
 const placeOrder = async (req, res, next) => {
   try {
-    const { items } = req.body;
+    const { items, credit_card_number, credit_card_expiry } = req.body;
     const userId = req.user.userId;
 
     if (!items || items.length === 0) {
       return res.status(400).json({
         success: false,
         message: 'Order must contain at least one item'
+      });
+    }
+
+    const cardValidation = validateCard({
+      creditCardNumber: credit_card_number,
+      creditCardExpiry: credit_card_expiry
+    });
+
+    if (!cardValidation.ok) {
+      return res.status(400).json({
+        success: false,
+        message: cardValidation.message
       });
     }
 
@@ -48,8 +61,8 @@ const placeOrder = async (req, res, next) => {
       }
 
       const [orderResult] = await conn.query(
-        'INSERT INTO CUSTOMER_ORDERS (user_id, total_amount) VALUES (?, ?)',
-        [userId, totalAmount]
+        'INSERT INTO CUSTOMER_ORDERS (user_id, total_amount, credit_card_number, credit_card_expiry) VALUES (?, ?, ?, ?)',
+        [userId, totalAmount, cardValidation.maskedNumber, cardValidation.normalizedExpiry]
       );
 
       const newOrderId = orderResult.insertId;
@@ -83,7 +96,7 @@ const viewPastOrders = async (req, res, next) => {
     const userId = req.user.userId;
 
     const orders = await query(
-      `SELECT order_id, order_date, total_amount
+      `SELECT order_id, order_date, total_amount, credit_card_number, credit_card_expiry
        FROM CUSTOMER_ORDERS
        WHERE user_id = ?
        ORDER BY order_date DESC`,
@@ -105,7 +118,7 @@ const viewOrderDetails = async (req, res, next) => {
     const userId = req.user.userId;
 
     const orders = await query(
-      'SELECT order_id, order_date, total_amount FROM CUSTOMER_ORDERS WHERE order_id = ? AND user_id = ?',
+      'SELECT order_id, order_date, total_amount, credit_card_number, credit_card_expiry FROM CUSTOMER_ORDERS WHERE order_id = ? AND user_id = ?',
       [orderId, userId]
     );
 

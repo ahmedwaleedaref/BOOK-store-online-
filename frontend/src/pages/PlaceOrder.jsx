@@ -1,37 +1,53 @@
-import React, { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import React, { useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useQuery } from 'react-query'
 import { booksAPI, ordersAPI } from '../services/api'
+import { useCart } from '../context/CartContext'
 
 const PlaceOrder = () => {
-  const location = useLocation()
-  const preselectIsbn = location.state?.preselectIsbn
-  const [items, setItems] = useState([{ isbn: preselectIsbn || '', quantity: 1 }])
+  const { items, clearCart } = useCart()
   const [loading, setLoading] = useState(false)
+  const [creditCardNumber, setCreditCardNumber] = useState('')
+  const [creditCardExpiry, setCreditCardExpiry] = useState('')
   const navigate = useNavigate()
   const { data } = useQuery('books', () => booksAPI.getAll())
   const books = data?.data?.data?.books || data?.data?.data || []
 
-  useEffect(() => {
-    if (preselectIsbn) {
-      setItems([{ isbn: preselectIsbn, quantity: 1 }])
-    }
-  }, [preselectIsbn])
+  const bookByIsbn = useMemo(() => {
+    const map = new Map()
+    books.forEach((b) => map.set(b.isbn, b))
+    return map
+  }, [books])
 
-  const addItem = () => setItems([...items, { isbn: '', quantity: 1 }])
-  const removeItem = (index) => setItems(items.filter((_, i) => i !== index))
-  const updateItem = (index, field, value) => {
-    const updated = [...items]
-    updated[index][field] = value
-    setItems(updated)
-  }
+  const lines = useMemo(() => {
+    return items.map((i) => {
+      const book = bookByIsbn.get(i.isbn)
+      const price = book?.price ?? 0
+      const title = book?.title ?? i.isbn
+      const subtotal = price * i.quantity
+      return { ...i, title, price, subtotal }
+    })
+  }, [items, bookByIsbn])
+
+  const total = useMemo(() => lines.reduce((acc, l) => acc + (l.subtotal || 0), 0), [lines])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     try {
-      await ordersAPI.placeOrder({ items })
+      if (!items || items.length === 0) {
+        toast.error('Your cart is empty')
+        return
+      }
+
+      await ordersAPI.placeOrder({
+        items,
+        credit_card_number: creditCardNumber,
+        credit_card_expiry: creditCardExpiry
+      })
+
+      clearCart()
       toast.success('Order placed successfully!')
       navigate('/my-orders')
     } catch (error) {
@@ -43,32 +59,78 @@ const PlaceOrder = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Place Order</h1>
+      <h1 className="text-3xl font-bold mb-6">Checkout</h1>
       <div className="card">
-        <form onSubmit={handleSubmit}>
-          {items.map((item, index) => (
-            <div key={index} className="flex gap-4 mb-4">
-              <select required className="input flex-1" value={item.isbn}
-                onChange={(e) => updateItem(index, 'isbn', e.target.value)}>
-                <option value="">Select Book</option>
-                {books.map(book => (
-                  <option key={book.isbn} value={book.isbn}>
-                    {book.title} - ${book.price} ({book.quantity_in_stock} available)
-                  </option>
-                ))}
-              </select>
-              <input type="number" min="1" required className="input w-24" value={item.quantity}
-                onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value))} />
-              {items.length > 1 && (
-                <button type="button" onClick={() => removeItem(index)} className="btn btn-danger">Remove</button>
-              )}
+        {items.length === 0 ? (
+          <div className="text-center">
+            <p className="text-gray-700">Your cart is empty.</p>
+            <div className="mt-4">
+              <Link to="/books" className="btn btn-primary">Browse Books</Link>
             </div>
-          ))}
-          <button type="button" onClick={addItem} className="btn btn-secondary mb-4">Add Another Book</button>
-          <button type="submit" disabled={loading} className="btn btn-primary w-full">
-            {loading ? 'Placing Order...' : 'Place Order'}
-          </button>
-        </form>
+          </div>
+        ) : (
+          <>
+            <h2 className="text-xl font-semibold mb-4">Cart Items</h2>
+            <div className="overflow-x-auto mb-6">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="text-left text-sm text-gray-600 border-b">
+                    <th className="py-2">Book</th>
+                    <th className="py-2">Qty</th>
+                    <th className="py-2">Price</th>
+                    <th className="py-2">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lines.map((line) => (
+                    <tr key={line.isbn} className="border-b last:border-b-0">
+                      <td className="py-3 font-medium">{line.title}</td>
+                      <td className="py-3">{line.quantity}</td>
+                      <td className="py-3">${line.price}</td>
+                      <td className="py-3 font-semibold">${line.subtotal.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex items-center justify-between mb-8">
+              <div className="text-gray-600">Total</div>
+              <div className="text-2xl font-bold text-primary-600">${total.toFixed(2)}</div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <h2 className="text-xl font-semibold">Payment</h2>
+              <div>
+                <label className="text-sm text-gray-600">Credit Card Number</label>
+                <input
+                  className="input"
+                  value={creditCardNumber}
+                  onChange={(e) => setCreditCardNumber(e.target.value)}
+                  placeholder="e.g. 4242 4242 4242 4242"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-sm text-gray-600">Expiry Date</label>
+                <input
+                  className="input"
+                  value={creditCardExpiry}
+                  onChange={(e) => setCreditCardExpiry(e.target.value)}
+                  placeholder="MM/YY"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Link to="/cart" className="btn btn-secondary">Back to Cart</Link>
+                <button type="submit" disabled={loading} className="btn btn-primary flex-1">
+                  {loading ? 'Placing Order...' : 'Place Order'}
+                </button>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </div>
   )

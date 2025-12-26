@@ -74,6 +74,8 @@ CREATE TABLE CUSTOMER_ORDERS (
     user_id INT NOT NULL,
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     total_amount DECIMAL(10,2) NOT NULL CHECK (total_amount >= 0),
+    credit_card_number VARCHAR(25) NOT NULL,
+    credit_card_expiry VARCHAR(7) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 
@@ -235,7 +237,7 @@ INSERT INTO BOOK_AUTHORS (book_isbn, author_id) VALUES
 ('9780062694690', 8),
 ('9780345384560', 9),
 ('9780393354324', 10),
-('9780141439518', 1),  -- Stephen Hawking also wrote Origin of Species context
+('9780141439518', 1),  
 ('9780452284234', 2),  -- Multiple authors possible
 ('9780316769488', 3),
 ('9780525478812', 5),
@@ -251,13 +253,14 @@ VALUES
 ('charlie_brown','$2a$10$W3nJeN32U3L20SDxWXr8DOgGKVeAK1KP2V9gLcdGPyqgwzAfc656a','charlie.brown@email.com', 'Charlie', 'Brown', '555-0105', '654 Maple Dr, Phoenix, AZ 85001', 'customer');
 
 -- Insert Sample Customer Orders 
-INSERT INTO CUSTOMER_ORDERS (user_id, order_date, total_amount)
+INSERT INTO CUSTOMER_ORDERS (user_id, order_date, total_amount, credit_card_number, credit_card_expiry)
 VALUES 
-(2, DATE_SUB(NOW(), INTERVAL 60 DAY), 68.97),  -- john_doe
-(3, DATE_SUB(NOW(), INTERVAL 45 DAY), 89.97),  -- jane_smith
-(4, DATE_SUB(NOW(), INTERVAL 30 DAY), 45.98),  -- bob_wilson
-(2, DATE_SUB(NOW(), INTERVAL 15 DAY), 132.48), -- john_doe (2nd order)
-(5, DATE_SUB(NOW(), INTERVAL 7 DAY), 54.98);   -- charlie_brown
+(2, DATE_SUB(NOW(), INTERVAL 60 DAY), 68.97, '**** **** **** 4242', '12/29'),  -- john_doe
+(3, DATE_SUB(NOW(), INTERVAL 45 DAY), 89.97, '**** **** **** 1111', '11/28'),  -- jane_smith
+(4, DATE_SUB(NOW(), INTERVAL 30 DAY), 45.98, '**** **** **** 0002', '08/30'),  -- bob_wilson
+(2, DATE_SUB(NOW(), INTERVAL 15 DAY), 132.48, '**** **** **** 4242', '12/29'), -- john_doe (2nd order)
+(5, DATE_SUB(NOW(), INTERVAL 7 DAY), 54.98, '**** **** **** 2222', '01/31');   -- charlie_brown
+
 
 -- Insert Order Items
 INSERT INTO ORDER_ITEMS (order_id, book_isbn, quantity, price_at_purchase)

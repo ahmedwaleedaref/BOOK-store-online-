@@ -3,9 +3,11 @@ import { Link, useParams } from 'react-router-dom'
 import { useQuery } from 'react-query'
 import { ordersAPI } from '../services/api'
 import Loading from '../components/Loading'
+import { useAuth } from '../context/AuthContext'
 
 const OrderDetails = () => {
   const { orderId } = useParams()
+  const { isAdmin } = useAuth()
 
   const {
     data,
@@ -67,6 +69,16 @@ const OrderDetails = () => {
       </div>
 
       <div className="card">
+        {(order.credit_card_number || order.credit_card_expiry) && (
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-2">Payment</h2>
+            <div className="text-gray-700">
+              <div>Card: <span className="font-medium">{order.credit_card_number || '—'}</span></div>
+              <div>Expiry: <span className="font-medium">{order.credit_card_expiry || '—'}</span></div>
+            </div>
+          </div>
+        )}
+
         <h2 className="text-xl font-semibold mb-4">Items</h2>
         {items.length === 0 ? (
           <p className="text-gray-600">No items found for this order.</p>
@@ -99,7 +111,9 @@ const OrderDetails = () => {
 
         <div className="mt-6 flex gap-3">
           <Link to="/my-orders" className="btn btn-secondary">Back</Link>
-          <Link to="/books" className="btn btn-primary">Browse Books</Link>
+          <Link to={isAdmin ? '/admin' : '/books'} className="btn btn-primary">
+            {isAdmin ? 'Admin Dashboard' : 'Browse Books'}
+          </Link>
         </div>
       </div>
     </div>

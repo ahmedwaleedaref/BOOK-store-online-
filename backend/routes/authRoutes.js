@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { authenticateToken } = require('../middleware/auth');
-const { validateRegistration, validateLogin } = require('../middleware/validation');
+const { validateRegistration, validateLogin, validate } = require('../middleware/validation');
 const { body } = require('express-validator');
 
 router.post('/register', validateRegistration, authController.register);
@@ -19,6 +19,7 @@ router.put(
     body('email').optional().trim().isEmail().normalizeEmail(),
     body('phone_number').optional().trim()
   ],
+  validate,
   authController.updateProfile
 );
 
@@ -33,6 +34,7 @@ router.put(
       .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
       .withMessage('New password must contain uppercase, lowercase, and number')
   ],
+  validate,
   authController.changePassword
 );
 

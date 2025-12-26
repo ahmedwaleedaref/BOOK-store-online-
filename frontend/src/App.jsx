@@ -16,6 +16,8 @@ import BookDetails from './pages/BookDetails'
 import PlaceOrder from './pages/PlaceOrder'
 import MyOrders from './pages/MyOrders'
 import OrderDetails from './pages/OrderDetails'
+import Cart from './pages/Cart'
+import Profile from './pages/Profile'
 
 import AdminDashboard from './pages/admin/Dashboard'
 import AdminBooks from './pages/admin/Books'
@@ -26,7 +28,7 @@ import AdminAuthors from './pages/admin/Authors'
 import AdminReports from './pages/admin/Reports'
 
 function App() {
-  const { loading } = useAuth()
+  const { loading, isAdmin } = useAuth()
 
   if (loading) {
     return <Loading fullScreen />
@@ -41,15 +43,31 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/books" element={<Books />} />
-          <Route path="/books/:isbn" element={<BookDetails />} />
+          <Route path="/books" element={isAdmin ? <Navigate to="/admin" replace /> : <Books />} />
+          <Route path="/books/:isbn" element={isAdmin ? <Navigate to="/admin" replace /> : <BookDetails />} />
 
           {/* Customer Routes */}
+          <Route
+            path="/cart"
+            element={
+              <PrivateRoute requireCustomer>
+                <Cart />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/place-order"
             element={
               <PrivateRoute requireCustomer>
                 <PlaceOrder />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute requireCustomer>
+                <Profile />
               </PrivateRoute>
             }
           />

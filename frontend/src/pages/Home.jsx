@@ -19,12 +19,14 @@ const Home = () => {
           </p>
 
           <div className="flex justify-center space-x-4">
-            <Link
-              to="/books"
-              className="btn btn-primary text-lg px-8 py-3"
-            >
-              Browse Books
-            </Link>
+            {(!isAuthenticated || !isAdmin) && (
+              <Link
+                to="/books"
+                className="btn btn-primary text-lg px-8 py-3"
+              >
+                Browse Books
+              </Link>
+            )}
             {!isAuthenticated && (
               <Link
                 to="/register"

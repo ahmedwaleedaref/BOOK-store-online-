@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
 const { authenticateToken, requireCustomer, requireAdmin } = require('../middleware/auth');
-const { validateId } = require('../middleware/validation');
+const { validateId, validate } = require('../middleware/validation');
 const { body } = require('express-validator');
 
 router.post(
@@ -12,8 +12,11 @@ router.post(
   [
     body('items').isArray({ min: 1 }).withMessage('Order must contain at least one item'),
     body('items.*.isbn').trim().notEmpty().withMessage('Each item must have an ISBN'),
-    body('items.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1')
+    body('items.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
+    body('credit_card_number').trim().notEmpty().withMessage('Credit card number is required'),
+    body('credit_card_expiry').trim().notEmpty().withMessage('Credit card expiry date is required')
   ],
+  validate,
   orderController.placeOrder
 );
 
@@ -62,6 +65,7 @@ router.post(
     body('book_isbn').trim().notEmpty().withMessage('Book ISBN is required'),
     body('order_quantity').isInt({ min: 1 }).withMessage('Order quantity must be at least 1')
   ],
+  validate,
   orderController.placePublisherOrder
 );
 
