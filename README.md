@@ -2,7 +2,7 @@
 
 Full-stack bookstore application with a **React (Vite) + Tailwind** frontend and a **Node.js (Express) + MySQL** backend.
 
-This project uses a **direct order placement model** (no shopping cart). Customers choose books and quantities and place an order immediately. The database includes triggers for stock validation, stock deduction, and auto-reorder behavior.
+This project uses a **direct order placement model**. Customers choose books and quantities and place an order immediately. The database includes triggers for stock validation, stock deduction, and auto-reorder behavior.
 
 ## Features
 
