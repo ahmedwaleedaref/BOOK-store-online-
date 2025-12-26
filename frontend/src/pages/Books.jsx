@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useQuery } from 'react-query'
 import { booksAPI } from '../services/api'
 import BookCard from '../components/BookCard'
@@ -6,11 +6,17 @@ import Loading from '../components/Loading'
 
 const Books = () => {
   const [category, setCategory] = useState('')
+  const { data: categoriesData } = useQuery('categories', booksAPI.getCategories)
+
   const { data, isLoading } = useQuery(['books', category], () =>
     category ? booksAPI.getByCategory(category) : booksAPI.getAll()
   )
 
   const books = data?.data?.data?.books || data?.data?.data || []
+  const categories = useMemo(() => {
+    const raw = categoriesData?.data?.data || []
+    return raw.map((c) => c.category).filter(Boolean)
+  }, [categoriesData])
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -19,11 +25,9 @@ const Books = () => {
       <div className="mb-6">
         <select className="input max-w-xs" value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="">All Categories</option>
-          <option value="Science">Science</option>
-          <option value="Art">Art</option>
-          <option value="Religion">Religion</option>
-          <option value="History">History</option>
-          <option value="Geography">Geography</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
         </select>
       </div>
 

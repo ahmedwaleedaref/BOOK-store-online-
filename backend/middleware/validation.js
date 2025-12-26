@@ -32,7 +32,7 @@ const validateBook = [
     .optional()
     .isInt({ min: 1000, max: new Date().getFullYear() + 1 })
     .withMessage('Invalid publication year'),
-  body('selling_price')
+  body('price')
     .isFloat({ min: 0.01 })
     .withMessage('Price must be greater than 0'),
   body('category')
@@ -153,11 +153,16 @@ const validateIsbn = [
   validate
 ];
 
-// ID parameter validation
+// ID parameter validation (supports routes that use :id or :orderId)
 const validateId = [
   param('id')
+    .optional()
     .isInt({ min: 1 })
     .withMessage('Invalid ID'),
+  param('orderId')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Invalid order ID'),
   validate
 ];
 

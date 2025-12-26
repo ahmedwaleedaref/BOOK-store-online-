@@ -1,7 +1,104 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
+import { useQuery } from 'react-query'
+import { booksAPI } from '../services/api'
+import Loading from '../components/Loading'
+
 const BookDetails = () => {
   const { isbn } = useParams()
-  return <div className="max-w-4xl mx-auto px-4 py-8"><h1 className="text-3xl font-bold">Book Details: {isbn}</h1></div>
+
+  const {
+    data,
+    isLoading,
+    isError,
+    error
+  } = useQuery(['book', isbn], () => booksAPI.getByIsbn(isbn), {
+    enabled: !!isbn
+  })
+
+  const book = data?.data?.data
+
+  if (isLoading) return <Loading />
+
+  if (isError) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="card">
+          <h1 className="text-2xl font-bold mb-2">Book not available</h1>
+          <p className="text-gray-600">
+            {error?.response?.data?.message || 'Failed to load book details'}
+          </p>
+          <div className="mt-4">
+            <Link to="/books" className="btn btn-secondary">Back to Books</Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!book) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="card">
+          <h1 className="text-2xl font-bold">Book not found</h1>
+          <div className="mt-4">
+            <Link to="/books" className="btn btn-secondary">Back to Books</Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-3xl font-bold">{book.title}</h1>
+          <p className="text-gray-600 mt-1">ISBN: {book.isbn}</p>
+        </div>
+        <div className="text-right">
+          <div className="text-3xl font-bold text-primary-600">${book.price}</div>
+          <div className="text-sm text-gray-600">In stock: {book.quantity_in_stock}</div>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div className="text-sm text-gray-500">Authors</div>
+            <div className="font-medium">{book.authors || '—'}</div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500">Publisher</div>
+            <div className="font-medium">{book.publisher_name || '—'}</div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500">Category</div>
+            <div className="font-medium">{book.category || '—'}</div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500">Publication Year</div>
+            <div className="font-medium">{book.publication_year || '—'}</div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500">Threshold Quantity</div>
+            <div className="font-medium">{book.threshold_quantity ?? '—'}</div>
+          </div>
+        </div>
+
+        <div className="mt-6 flex gap-3">
+          <Link
+            to="/place-order"
+            state={{ preselectIsbn: book.isbn }}
+            className="btn btn-primary"
+          >
+            Place Order
+          </Link>
+          <Link to="/books" className="btn btn-secondary">Back</Link>
+        </div>
+      </div>
+    </div>
+  )
 }
+
 export default BookDetails

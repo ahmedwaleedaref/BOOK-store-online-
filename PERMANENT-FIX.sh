@@ -24,7 +24,7 @@ cp backend/bookstore.sql backend/bookstore.sql.backup
 sed -i "s/\\\$2a\\\$10\\\$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy/$ADMIN/g" backend/bookstore.sql
 
 echo ""
-echo "✅ DONE! Testing..."
+echo " DONE! Testing..."
 sleep 2
 
 curl -s -X POST http://localhost:3000/api/auth/login \

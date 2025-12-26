@@ -9,11 +9,11 @@ TOKEN=$(curl -s -X POST http://localhost:3000/api/auth/login \
   -d '{"username":"john_doe","password":"Customer123!"}' | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
 
 if [ -z "$TOKEN" ]; then
-    echo "❌ Login failed!"
+    echo " Login failed!"
     exit 1
 fi
 
-echo "✅ Got token: ${TOKEN:0:20}..."
+echo " Got token: ${TOKEN:0:20}..."
 
 # Try to place order
 echo ""
@@ -30,9 +30,9 @@ RESPONSE=$(curl -s -X POST http://localhost:3000/api/orders \
 echo "Response: $RESPONSE"
 
 if [[ $RESPONSE == *"success\":true"* ]]; then
-    echo "✅ Order placed!"
+    echo " Order placed!"
 else
-    echo "❌ Order failed!"
+    echo " Order failed!"
     echo ""
     echo "Checking backend logs..."
     docker-compose logs backend | tail -20

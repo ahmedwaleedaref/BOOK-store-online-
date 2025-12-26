@@ -178,14 +178,11 @@ BEGIN
 END//
 DELIMITER ;
 
--- ============================================================================
 -- SECTION 3: SAMPLE DATA
--- ============================================================================
 
 -- Insert Admin User (password: Admin123!)
 INSERT INTO USERS (username, password_hash, email, first_name, last_name, phone_number, address, user_type)
-VALUES ('admin', '$2a$10$BfG49XzSs6h5AX5X8QX2QeLbpg0lIJtjuFcfXUvsS7loWJfUt6JD2', 
-        'admin@bookstore.com', 'System', 'Administrator', '555-0100', 'Admin Office', 'admin');
+VALUES ('admin','$2a$10$BfG49XzSs6h5AX5X8QX2QeLbpg0lIJtjuFcfXUvsS7loWJfUt6JD2','admin@bookstore.com', 'System', 'Administrator', '555-0100', 'Admin Office', 'admin');
 
 -- Insert Publishers
 INSERT INTO PUBLISHERS (publisher_name, address, phone_number) VALUES
@@ -247,18 +244,13 @@ INSERT INTO BOOK_AUTHORS (book_isbn, author_id) VALUES
 -- Insert Sample Customers (password: Customer123!)
 INSERT INTO USERS (username, password_hash, email, first_name, last_name, phone_number, address, user_type)
 VALUES 
-('john_doe', '$2a$10$BfG49XzSs6h5AX5X8QX2QeLbpg0lIJtjuFcfXUvsS7loWJfUt6JD2', 
- 'john.doe@email.com', 'John', 'Doe', '555-0101', '123 Main St, New York, NY 10001', 'customer'),
-('jane_smith', '$2a$10$BfG49XzSs6h5AX5X8QX2QeLbpg0lIJtjuFcfXUvsS7loWJfUt6JD2', 
- 'jane.smith@email.com', 'Jane', 'Smith', '555-0102', '456 Oak Ave, Los Angeles, CA 90001', 'customer'),
-('bob_wilson', '$2a$10$BfG49XzSs6h5AX5X8QX2QeLbpg0lIJtjuFcfXUvsS7loWJfUt6JD2', 
- 'bob.wilson@email.com', 'Bob', 'Wilson', '555-0103', '789 Pine Rd, Chicago, IL 60601', 'customer'),
-('alice_johnson', '$2a$10$BfG49XzSs6h5AX5X8QX2QeLbpg0lIJtjuFcfXUvsS7loWJfUt6JD2', 
- 'alice.johnson@email.com', 'Alice', 'Johnson', '555-0104', '321 Elm St, Houston, TX 77001', 'customer'),
-('charlie_brown', '$2a$10$BfG49XzSs6h5AX5X8QX2QeLbpg0lIJtjuFcfXUvsS7loWJfUt6JD2', 
- 'charlie.brown@email.com', 'Charlie', 'Brown', '555-0105', '654 Maple Dr, Phoenix, AZ 85001', 'customer');
+('john_doe', '$2a$10$BfG49XzSs6h5AX5X8QX2QeLbpg0lIJtjuFcfXUvsS7loWJfUt6JD2','john.doe@email.com', 'John', 'Doe', '555-0101', '123 Main St, New York, NY 10001', 'customer'),
+('jane_smith', '$2a$10$BfG49XzSs6h5AX5X8QX2QeLbpg0lIJtjuFcfXUvsS7loWJfUt6JD2','jane.smith@email.com', 'Jane', 'Smith', '555-0102', '456 Oak Ave, Los Angeles, CA 90001', 'customer'),
+('bob_wilson', '$2a$10$BfG49XzSs6h5AX5X8QX2QeLbpg0lIJtjuFcfXUvsS7loWJfUt6JD2','bob.wilson@email.com', 'Bob', 'Wilson', '555-0103', '789 Pine Rd, Chicago, IL 60601', 'customer'),
+('alice_johnson', '$2a$10$BfG49XzSs6h5AX5X8QX2QeLbpg0lIJtjuFcfXUvsS7loWJfUt6JD2','alice.johnson@email.com', 'Alice', 'Johnson', '555-0104', '321 Elm St, Houston, TX 77001', 'customer'),
+('charlie_brown', '$2a$10$BfG49XzSs6h5AX5X8QX2QeLbpg0lIJtjuFcfXUvsS7loWJfUt6JD2','charlie.brown@email.com', 'Charlie', 'Brown', '555-0105', '654 Maple Dr, Phoenix, AZ 85001', 'customer');
 
--- Insert Sample Customer Orders (Direct Orders - No Cart)
+-- Insert Sample Customer Orders 
 INSERT INTO CUSTOMER_ORDERS (user_id, order_date, total_amount)
 VALUES 
 (2, DATE_SUB(NOW(), INTERVAL 60 DAY), 68.97),  -- john_doe

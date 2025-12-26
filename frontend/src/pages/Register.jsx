@@ -53,13 +53,13 @@ const Register = () => {
                   onChange={(e) => setFormData({...formData, phone_number: e.target.value})} />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">First Name</label>
-                <input className="input" value={formData.first_name}
+                <label className="block text-sm font-medium mb-1">First Name *</label>
+                <input required className="input" value={formData.first_name}
                   onChange={(e) => setFormData({...formData, first_name: e.target.value})} />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Last Name</label>
-                <input className="input" value={formData.last_name}
+                <label className="block text-sm font-medium mb-1">Last Name *</label>
+                <input required className="input" value={formData.last_name}
                   onChange={(e) => setFormData({...formData, last_name: e.target.value})} />
               </div>
             </div>

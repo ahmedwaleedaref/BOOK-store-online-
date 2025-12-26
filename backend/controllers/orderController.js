@@ -20,26 +20,34 @@ const placeOrder = async (req, res, next) => {
       const orderItems = [];
 
       for (const item of items) {
-        const [books] = await conn.query(
+        const [rows] = await conn.query(
           'SELECT isbn, price, quantity_in_stock FROM BOOKS WHERE isbn = ?',
           [item.isbn]
         );
 
-        if (!books) {
-          throw new Error(`Book ${item.isbn} not found`);
+        const book = rows && rows.length > 0 ? rows[0] : null;
+
+        if (!book) {
+          const err = new Error(`Book ${item.isbn} not found`);
+          err.status = 400;
+          throw err;
         }
 
-        if (books.quantity_in_stock < item.quantity) {
-          throw new Error(`Insufficient stock for ${item.isbn}. Available: ${books.quantity_in_stock}`);
+        if (book.quantity_in_stock < item.quantity) {
+          const err = new Error(
+            `Insufficient stock for ${item.isbn}. Available: ${book.quantity_in_stock}`
+          );
+          err.status = 400;
+          throw err;
         }
 
         orderItems.push({
           isbn: item.isbn,
           quantity: item.quantity,
-          price: books.price
+          price: book.price
         });
 
-        totalAmount += books.price * item.quantity;
+        totalAmount += book.price * item.quantity;
       }
 
       // Create customer order

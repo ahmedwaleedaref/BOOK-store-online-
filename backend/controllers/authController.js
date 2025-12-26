@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { query, transaction } = require('../config/database');
+const { query } = require('../config/database');
 
 // Generate JWT token
 const generateToken = (userId, username, userType) => {
@@ -62,11 +62,6 @@ const login = async (req, res, next) => {
   try {
     const { username, password } = req.body;
 
-    console.log('=== LOGIN ATTEMPT ===');
-    console.log('Username:', username);
-    console.log('Password received:', password);
-    console.log('Password length:', password.length);
-
     // Get user from database
     const users = await query(
       `SELECT user_id, username, password_hash, email, user_type
@@ -75,10 +70,7 @@ const login = async (req, res, next) => {
       [username]
     );
 
-    console.log('Users found:', users.length);
-
     if (users.length === 0) {
-      console.log('ERROR: User not found');
       return res.status(401).json({
         success: false,
         message: 'Invalid username or password'
@@ -86,45 +78,16 @@ const login = async (req, res, next) => {
     }
 
     const user = users[0];
-    console.log('User found:', user.username);
-    console.log('User type:', user.user_type);
-    console.log('Hash from DB:', user.password_hash);
-    console.log('Hash length:', user.password_hash.length);
 
     // Verify password
-    console.log('Starting bcrypt compare...');
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-    console.log('Password valid:', isPasswordValid);
 
     if (!isPasswordValid) {
-      console.log('ERROR: Password does not match');
       return res.status(401).json({
         success: false,
         message: 'Invalid username or password'
       });
     }
-
-    console.log('SUCCESS: Login successful for', username);
-
-    // Generate token
-    const token = generateToken(user.user_id, user.username, user.user_type);
-
-    res.json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        userId: user.user_id,
-        username: user.username,
-        email: user.email,
-        userType: user.user_type,
-        token
-      }
-    });
-  } catch (error) {
-    console.error('LOGIN ERROR:', error);
-    next(error);
-  }
-};
 
     // Generate token
     const token = generateToken(user.user_id, user.username, user.user_type);

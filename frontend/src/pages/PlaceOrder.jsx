@@ -1,15 +1,23 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useQuery } from 'react-query'
 import { booksAPI, ordersAPI } from '../services/api'
 
 const PlaceOrder = () => {
-  const [items, setItems] = useState([{ isbn: '', quantity: 1 }])
+  const location = useLocation()
+  const preselectIsbn = location.state?.preselectIsbn
+  const [items, setItems] = useState([{ isbn: preselectIsbn || '', quantity: 1 }])
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const { data } = useQuery('books', () => booksAPI.getAll())
   const books = data?.data?.data?.books || data?.data?.data || []
+
+  useEffect(() => {
+    if (preselectIsbn) {
+      setItems([{ isbn: preselectIsbn, quantity: 1 }])
+    }
+  }, [preselectIsbn])
 
   const addItem = () => setItems([...items, { isbn: '', quantity: 1 }])
   const removeItem = (index) => setItems(items.filter((_, i) => i !== index))
@@ -23,7 +31,7 @@ const PlaceOrder = () => {
     e.preventDefault()
     setLoading(true)
     try {
-      const response = await ordersAPI.placeOrder({ items })
+      await ordersAPI.placeOrder({ items })
       toast.success('Order placed successfully!')
       navigate('/my-orders')
     } catch (error) {
