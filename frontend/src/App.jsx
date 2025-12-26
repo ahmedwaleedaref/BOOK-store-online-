@@ -4,12 +4,10 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { useAuth } from './context/AuthContext'
 
-// Components
 import Navbar from './components/Navbar'
 import PrivateRoute from './components/PrivateRoute'
 import Loading from './components/Loading'
 
-// Pages
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -19,7 +17,6 @@ import PlaceOrder from './pages/PlaceOrder'
 import MyOrders from './pages/MyOrders'
 import OrderDetails from './pages/OrderDetails'
 
-// Admin Pages
 import AdminDashboard from './pages/admin/Dashboard'
 import AdminBooks from './pages/admin/Books'
 import AdminOrders from './pages/admin/Orders'

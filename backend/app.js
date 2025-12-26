@@ -7,17 +7,14 @@ require('dotenv').config();
 
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 
-// Import routes
 const authRoutes = require('./routes/authRoutes');
 const bookRoutes = require('./routes/bookRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
-// Initialize Express app
 const app = express();
 
-// Middleware
 app.use(helmet());
 app.use(
   cors({
@@ -30,7 +27,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
     success: true,
@@ -39,14 +35,12 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Root endpoint
 app.get('/', (req, res) => {
   res.json({
     success: true,
@@ -73,7 +67,6 @@ app.get('/', (req, res) => {
   });
 });
 
-// Error handling
 app.use(notFound);
 app.use(errorHandler);
 

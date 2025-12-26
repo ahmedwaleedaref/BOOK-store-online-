@@ -9,7 +9,6 @@ const api = axios.create({
   }
 })
 
-// Add token to requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
@@ -21,7 +20,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// Handle responses
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -34,7 +32,6 @@ api.interceptors.response.use(
   }
 )
 
-// Auth API
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
@@ -43,7 +40,6 @@ export const authAPI = {
   logout: () => api.post('/auth/logout')
 }
 
-// Books API
 export const booksAPI = {
   getAll: (params) => api.get('/books', { params }),
   getByIsbn: (isbn) => api.get(`/books/${isbn}`),
@@ -54,7 +50,6 @@ export const booksAPI = {
   update: (isbn, data) => api.put(`/books/${isbn}`, data)
 }
 
-// Orders API
 export const ordersAPI = {
   placeOrder: (data) => api.post('/orders/place-order', data),
   getMyOrders: () => api.get('/orders/my-orders'),
@@ -65,7 +60,6 @@ export const ordersAPI = {
   placePublisherOrder: (data) => api.post('/orders/publisher-orders', data)
 }
 
-// Reports API
 export const reportsAPI = {
   getDashboard: () => api.get('/reports/dashboard'),
   getPreviousMonthSales: () => api.get('/reports/sales/previous-month'),
@@ -76,15 +70,12 @@ export const reportsAPI = {
   getBookReorderCount: (isbn) => api.get(`/reports/books/${isbn}/reorders`)
 }
 
-// Admin API
 export const adminAPI = {
-  // Publishers
   getPublishers: () => api.get('/admin/publishers'),
   createPublisher: (data) => api.post('/admin/publishers', data),
   updatePublisher: (id, data) => api.put(`/admin/publishers/${id}`, data),
   deletePublisher: (id) => api.delete(`/admin/publishers/${id}`),
   
-  // Authors
   getAuthors: () => api.get('/admin/authors'),
   createAuthor: (data) => api.post('/admin/authors', data),
   updateAuthor: (id, data) => api.put(`/admin/authors/${id}`, data),

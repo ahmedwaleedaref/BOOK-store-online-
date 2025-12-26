@@ -5,11 +5,9 @@ const { authenticateToken } = require('../middleware/auth');
 const { validateRegistration, validateLogin } = require('../middleware/validation');
 const { body } = require('express-validator');
 
-// Public routes
 router.post('/register', validateRegistration, authController.register);
 router.post('/login', validateLogin, authController.login);
 
-// Protected routes (require authentication)
 router.get('/profile', authenticateToken, authController.getProfile);
 
 router.put(

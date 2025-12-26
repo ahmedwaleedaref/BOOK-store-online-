@@ -1,11 +1,10 @@
 const jwt = require('jsonwebtoken');
 const { query } = require('../config/database');
 
-// Verify JWT token
 const authenticateToken = async (req, res, next) => {
   try {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
       return res.status(401).json({
@@ -14,7 +13,6 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    // Verify token
     jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
       if (err) {
         return res.status(403).json({
@@ -23,7 +21,6 @@ const authenticateToken = async (req, res, next) => {
         });
       }
 
-      // Check if user still exists
       const users = await query(
         'SELECT user_id, username, email, user_type FROM USERS WHERE user_id = ?',
         [decoded.userId]
@@ -54,7 +51,6 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-// Check if user is admin
 const requireAdmin = (req, res, next) => {
   if (req.user.userType !== 'admin') {
     return res.status(403).json({
@@ -65,7 +61,6 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
-// Check if user is customer
 const requireCustomer = (req, res, next) => {
   if (req.user.userType !== 'customer') {
     return res.status(403).json({

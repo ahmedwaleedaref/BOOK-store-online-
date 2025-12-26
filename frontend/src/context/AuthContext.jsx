@@ -17,8 +17,6 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
-
-  // Load user from localStorage on mount
   useEffect(() => {
     const storedToken = localStorage.getItem('token')
     const storedUser = localStorage.getItem('user')

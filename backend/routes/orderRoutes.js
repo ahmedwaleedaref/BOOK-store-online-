@@ -5,7 +5,6 @@ const { authenticateToken, requireCustomer, requireAdmin } = require('../middlew
 const { validateId } = require('../middleware/validation');
 const { body } = require('express-validator');
 
-// Customer routes - Direct Order Placement
 router.post(
   '/place-order',
   authenticateToken,
@@ -33,7 +32,6 @@ router.get(
   orderController.viewOrderDetails
 );
 
-// Admin routes
 router.get(
   '/',
   authenticateToken,

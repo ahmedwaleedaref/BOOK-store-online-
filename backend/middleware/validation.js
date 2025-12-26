@@ -1,6 +1,5 @@
 const { body, param, query, validationResult } = require('express-validator');
 
-// Validation result handler
 const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -13,7 +12,6 @@ const validate = (req, res, next) => {
   next();
 };
 
-// Book validation rules
 const validateBook = [
   body('isbn')
     .trim()
@@ -48,7 +46,6 @@ const validateBook = [
   validate
 ];
 
-// User registration validation
 const validateRegistration = [
   body('username')
     .trim()
@@ -86,7 +83,6 @@ const validateRegistration = [
   validate
 ];
 
-// Login validation
 const validateLogin = [
   body('username')
     .trim()
@@ -98,7 +94,6 @@ const validateLogin = [
   validate
 ];
 
-// Add to cart validation
 const validateAddToCart = [
   body('isbn')
     .trim()
@@ -110,7 +105,6 @@ const validateAddToCart = [
   validate
 ];
 
-// Checkout validation
 const validateCheckout = [
   body('shipping_address_id')
     .isInt({ min: 1 })
@@ -132,7 +126,6 @@ const validateCheckout = [
   validate
 ];
 
-// Search validation
 const validateSearch = [
   query('type')
     .isIn(['ISBN', 'TITLE', 'AUTHOR', 'CATEGORY', 'PUBLISHER'])
@@ -144,7 +137,6 @@ const validateSearch = [
   validate
 ];
 
-// ISBN parameter validation
 const validateIsbn = [
   param('isbn')
     .trim()
@@ -153,7 +145,6 @@ const validateIsbn = [
   validate
 ];
 
-// ID parameter validation (supports routes that use :id or :orderId)
 const validateId = [
   param('id')
     .optional()

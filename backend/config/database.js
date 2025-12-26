@@ -1,7 +1,6 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Database connection pool configuration
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
@@ -15,20 +14,18 @@ const pool = mysql.createPool({
   keepAliveInitialDelay: 0
 });
 
-// Test database connection
 const testConnection = async () => {
   try {
     const connection = await pool.getConnection();
-    console.log('✅ Database connected successfully');
+    console.log('Database connected successfully');
     connection.release();
     return true;
   } catch (error) {
-    console.error('❌ Database connection failed:', error.message);
+    console.error('Database connection failed:', error.message);
     return false;
   }
 };
 
-// Execute query
 const query = async (sql, params = []) => {
   const connection = await pool.getConnection();
   try {
@@ -41,7 +38,6 @@ const query = async (sql, params = []) => {
   }
 };
 
-// Execute transaction
 const transaction = async (callback) => {
   const connection = await pool.getConnection();
   try {

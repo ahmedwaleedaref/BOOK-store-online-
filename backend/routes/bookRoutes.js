@@ -8,14 +8,12 @@ const {
   validateIsbn
 } = require('../middleware/validation');
 
-// Public routes (browsing)
 router.get('/', bookController.getAllBooks);
 router.get('/categories', bookController.getCategories);
 router.get('/category/:category', bookController.getBooksByCategory);
 router.get('/search', validateSearch, bookController.searchBooks);
 router.get('/:isbn', validateIsbn, bookController.getBookByIsbn);
 
-// Admin only routes
 router.post(
   '/',
   authenticateToken,

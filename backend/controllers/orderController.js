@@ -1,9 +1,8 @@
 const { query, transaction } = require('../config/database');
 
-// Place Direct Order (Customer) - No Cart, No Payment Info
 const placeOrder = async (req, res, next) => {
   try {
-    const { items } = req.body; // items = [{ isbn, quantity }, ...]
+    const { items } = req.body;
     const userId = req.user.userId;
 
     if (!items || items.length === 0) {
@@ -13,9 +12,7 @@ const placeOrder = async (req, res, next) => {
       });
     }
 
-    // Use transaction for order placement
     const orderId = await transaction(async (conn) => {
-      // Calculate total and validate stock for all items
       let totalAmount = 0;
       const orderItems = [];
 
@@ -50,7 +47,6 @@ const placeOrder = async (req, res, next) => {
         totalAmount += book.price * item.quantity;
       }
 
-      // Create customer order
       const [orderResult] = await conn.query(
         'INSERT INTO CUSTOMER_ORDERS (user_id, total_amount) VALUES (?, ?)',
         [userId, totalAmount]
@@ -58,7 +54,6 @@ const placeOrder = async (req, res, next) => {
 
       const newOrderId = orderResult.insertId;
 
-      // Insert order items (triggers will validate and deduct stock)
       for (const orderItem of orderItems) {
         await conn.query(
           `INSERT INTO ORDER_ITEMS (order_id, book_isbn, quantity, price_at_purchase)
@@ -83,7 +78,6 @@ const placeOrder = async (req, res, next) => {
   }
 };
 
-// View past orders (Customer)
 const viewPastOrders = async (req, res, next) => {
   try {
     const userId = req.user.userId;
@@ -105,13 +99,11 @@ const viewPastOrders = async (req, res, next) => {
   }
 };
 
-// View order details (Customer)
 const viewOrderDetails = async (req, res, next) => {
   try {
     const { orderId } = req.params;
     const userId = req.user.userId;
 
-    // Verify order belongs to user
     const orders = await query(
       'SELECT order_id, order_date, total_amount FROM CUSTOMER_ORDERS WHERE order_id = ? AND user_id = ?',
       [orderId, userId]
@@ -124,7 +116,6 @@ const viewOrderDetails = async (req, res, next) => {
       });
     }
 
-    // Get order items
     const items = await query(
       `SELECT oi.order_item_id, oi.book_isbn, b.title, oi.quantity,
               oi.price_at_purchase, (oi.quantity * oi.price_at_purchase) AS subtotal
@@ -146,7 +137,6 @@ const viewOrderDetails = async (req, res, next) => {
   }
 };
 
-// Get all customer orders (Admin)
 const getAllOrders = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -163,7 +153,6 @@ const getAllOrders = async (req, res, next) => {
       [limit, offset]
     );
 
-    // Get total count
     const countResult = await query(
       'SELECT COUNT(*) AS total FROM CUSTOMER_ORDERS'
     );
@@ -186,7 +175,6 @@ const getAllOrders = async (req, res, next) => {
   }
 };
 
-// View publisher orders (Admin)
 const viewPublisherOrders = async (req, res, next) => {
   try {
     const status = req.query.status || 'pending';
@@ -217,13 +205,11 @@ const viewPublisherOrders = async (req, res, next) => {
   }
 };
 
-// Confirm publisher order (Admin)
 const confirmPublisherOrder = async (req, res, next) => {
   try {
     const { orderId } = req.params;
     const adminUserId = req.user.userId;
 
-    // Verify user is admin
     if (req.user.userType !== 'admin') {
       return res.status(403).json({
         success: false,
@@ -231,7 +217,6 @@ const confirmPublisherOrder = async (req, res, next) => {
       });
     }
 
-    // Check if order exists and is pending
     const orders = await query(
       'SELECT status FROM PUBLISHER_ORDERS WHERE order_id = ?',
       [orderId]
@@ -251,7 +236,6 @@ const confirmPublisherOrder = async (req, res, next) => {
       });
     }
 
-    // Confirm order (trigger will update stock automatically)
     await query(
       `UPDATE PUBLISHER_ORDERS
        SET status = 'confirmed',
@@ -270,13 +254,11 @@ const confirmPublisherOrder = async (req, res, next) => {
   }
 };
 
-// Place manual publisher order (Admin)
 const placePublisherOrder = async (req, res, next) => {
   try {
     const { book_isbn, order_quantity } = req.body;
     const adminUserId = req.user.userId;
 
-    // Get book's publisher
     const books = await query(
       'SELECT publisher_id FROM BOOKS WHERE isbn = ?',
       [book_isbn]
@@ -289,7 +271,6 @@ const placePublisherOrder = async (req, res, next) => {
       });
     }
 
-    // Create order with created_by tracking
     await query(
       `INSERT INTO PUBLISHER_ORDERS 
        (book_isbn, publisher_id, order_quantity, status, created_by)

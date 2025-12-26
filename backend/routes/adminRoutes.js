@@ -5,11 +5,9 @@ const { authenticateToken, requireAdmin } = require('../middleware/auth');
 const { validateId } = require('../middleware/validation');
 const { body } = require('express-validator');
 
-// All admin routes require admin authentication
 router.use(authenticateToken);
 router.use(requireAdmin);
 
-// Publisher routes
 router.get('/publishers', adminController.getAllPublishers);
 router.get('/publishers/:id', validateId, adminController.getPublisherById);
 
@@ -28,7 +26,6 @@ router.post(
 router.put('/publishers/:id', validateId, adminController.updatePublisher);
 router.delete('/publishers/:id', validateId, adminController.deletePublisher);
 
-// Author routes
 router.get('/authors', adminController.getAllAuthors);
 router.get('/authors/:id', validateId, adminController.getAuthorById);
 
