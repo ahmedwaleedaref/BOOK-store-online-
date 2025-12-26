@@ -1,14 +1,22 @@
-# Bookstore Online (Direct Order System)
+# Bookstore Online
 
 Full-stack bookstore application with a **React (Vite) + Tailwind** frontend and a **Node.js (Express) + MySQL** backend.
 
-This project uses a **direct order placement model**. Customers choose books and quantities and place an order immediately. The database includes triggers for stock validation, stock deduction, and auto-reorder behavior.
+This project supports a **shopping cart + checkout** flow for customers. The database includes triggers for stock validation, stock deduction, and auto-reorder behavior.
 
 ## Features
 
 ### Customer
 - Browse books, filter by category, view book details
-- Place an order directly (no cart)
+- Manage shopping cart:
+	- Add books to cart
+	- View cart items
+	- View individual and total prices
+	- Remove items / update quantities
+- Checkout cart:
+	- Provide credit card number + expiry date (validated)
+	- Stock is deducted after purchase (via DB triggers)
+- Edit personal information (profile) and change password
 - View order history and order details
 
 ### Admin
@@ -26,6 +34,8 @@ The database schema (see [backend/bookstore.sql](backend/bookstore.sql)) include
 - Validate stock before inserting order items
 - Deduct stock after a sale
 - Increase stock when a publisher order is confirmed
+
+**Payment storage note:** the backend validates the credit card input during checkout and stores only a **masked** card number (e.g. `**** **** **** 4242`) and an expiry string on the order record. It does **not** store full card numbers.
 
 ## Tech Stack
 - **Backend:** Node.js, Express, mysql2, JWT auth
@@ -71,6 +81,8 @@ npm install
 npm run dev
 ```
 
+
+
 The backend runs on `http://localhost:3000` by default.
 
 ### 3) Frontend
@@ -79,6 +91,7 @@ cd frontend
 npm install
 npm run dev
 ```
+
 
 The frontend uses `VITE_API_URL` to connect to the backend.
 
@@ -126,6 +139,7 @@ Base URL: `http://localhost:3000/api`
 
 ### Orders (`/api/orders`)
 - `POST /place-order` (customer)
+	- body: `items: [{ isbn, quantity }]`, `credit_card_number`, `credit_card_expiry`
 - `GET /my-orders` (customer)
 - `GET /my-orders/:orderId` (customer)
 - `GET /` (admin, paginated)
@@ -150,6 +164,16 @@ backend/   Express API + MySQL integration
 frontend/  React UI (Vite + Tailwind)
 docker/    Dockerfiles used by docker-compose
 ```
+
+## UI Routes (Frontend)
+
+### Customer
+- `/cart` Shopping cart
+- `/place-order` Checkout
+- `/profile` Edit profile + change password
+
+### Admin
+- Admin users are redirected away from the Browse Books pages (`/books`, `/books/:isbn`) to the admin dashboard.
 
 
 ### Reset containers & volumes
