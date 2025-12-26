@@ -107,7 +107,6 @@ Important variables:
 
 ### Frontend API URL
 Frontend Axios base URL is:
-- `import.meta.env.VITE_API_URL` (if set)
 - otherwise defaults to `http://localhost:3000/api`
 
 ## Demo Accounts
