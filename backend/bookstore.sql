@@ -192,7 +192,12 @@ INSERT INTO PUBLISHERS (publisher_name, address, phone_number) VALUES
 ('HarperCollins', '195 Broadway, New York, NY 10007', '212-207-7000'),
 ('Simon & Schuster', '1230 Avenue of the Americas, New York, NY 10020', '212-698-7000'),
 ('Macmillan Publishers', '120 Broadway, New York, NY 10271', '646-307-5151'),
-('Hachette Book Group', '1290 Avenue of the Americas, New York, NY 10104', '212-364-1100');
+('Hachette Book Group', '1290 Avenue of the Americas, New York, NY 10104', '212-364-1100'),
+('Scholastic', '557 Broadway, New York, NY 10012', '212-343-6100'),
+('Bloomsbury Publishing', '1385 Broadway, New York, NY 10018', '212-419-5300'),
+('Oxford University Press', '198 Madison Avenue, New York, NY 10016', '212-726-6000'),
+('Cambridge University Press', '1 Liberty Plaza, New York, NY 10006', '212-337-5000'),
+('Wiley', '111 River Street, Hoboken, NJ 07030', '201-748-6000');
 
 -- Insert Authors
 INSERT INTO AUTHORS (author_name) VALUES
@@ -205,43 +210,191 @@ INSERT INTO AUTHORS (author_name) VALUES
 ('Carl Sagan'),
 ('Howard Zinn'),
 ('Karen Armstrong'),
-('Jared Diamond');
+('Jared Diamond'),
+('J.K. Rowling'),
+('George Orwell'),
+('Harper Lee'),
+('F. Scott Fitzgerald'),
+('Jane Austen'),
+('Mark Twain'),
+('Ernest Hemingway'),
+('Charles Dickens'),
+('Leo Tolstoy'),
+('Fyodor Dostoevsky'),
+('Gabriel Garcia Marquez'),
+('Paulo Coelho'),
+('Dan Brown'),
+('Agatha Christie'),
+('Stephen King'),
+('J.R.R. Tolkien'),
+('C.S. Lewis'),
+('Isaac Asimov'),
+('Arthur Conan Doyle'),
+('Oscar Wilde'),
+('Virginia Woolf'),
+('James Joyce'),
+('Franz Kafka'),
+('Albert Camus'),
+('Jean-Paul Sartre'),
+('Umberto Eco'),
+('Haruki Murakami'),
+('Khaled Hosseini'),
+('Chimamanda Ngozi Adichie'),
+('Neil Gaiman'),
+('Margaret Atwood'),
+('Cormac McCarthy'),
+('Donna Tartt'),
+('Colleen Hoover'),
+('James Clear'),
+('Cal Newport'),
+('Robert Greene'),
+('Ryan Holiday'),
+('Brene Brown'),
+('Adam Grant');
 
--- Insert Books
+-- Insert Books (Real bestsellers and classics with actual ISBNs)
 INSERT INTO BOOKS (isbn, title, publisher_id, publication_year, price, category, quantity_in_stock, threshold_quantity) VALUES
+-- Science
 ('9780553380163', 'A Brief History of Time', 1, 1988, 18.99, 'Science', 50, 10),
+('9780345539434', 'Cosmos', 1, 1980, 22.00, 'Science', 55, 12),
+('9780141439518', 'The Origin of Species', 1, 1859, 15.99, 'Science', 30, 8),
+('9780307474278', 'The Elegant Universe', 2, 1999, 17.99, 'Science', 45, 10),
+('9780393609394', 'Astrophysics for People in a Hurry', 3, 2017, 14.99, 'Science', 80, 15),
+('9780143111368', 'The Gene: An Intimate History', 1, 2016, 20.00, 'Science', 35, 8),
+('9780062316097', 'Sapiens: A Brief History of Humankind', 2, 2015, 24.99, 'Science', 95, 20),
+('9780525559474', 'The Body: A Guide for Occupants', 1, 2019, 19.99, 'Science', 60, 12),
+('9780374533557', 'Thinking, Fast and Slow', 4, 2011, 18.00, 'Science', 70, 15),
+('9780143127741', 'Sapiens Graphic Novel', 2, 2020, 29.99, 'Science', 40, 10),
+
+-- History
 ('9780062316110', 'Sapiens: A Brief History of Humankind', 2, 2011, 24.99, 'History', 75, 15),
-('9780316346627', 'Outliers: The Story of Success', 3, 2008, 17.99, 'Science', 60, 12),
 ('9781524763138', 'Becoming', 1, 2018, 32.50, 'History', 100, 20),
 ('9780399590504', 'Educated: A Memoir', 1, 2018, 28.00, 'History', 80, 15),
-('9780807067048', 'Mans Search for Meaning', 1, 1946, 14.99, 'Religion', 45, 10),
-('9780345539434', 'Cosmos', 1, 1980, 22.00, 'Science', 55, 12),
 ('9780062694690', 'A Peoples History of the United States', 2, 1980, 19.99, 'History', 40, 10),
+('9780393354324', 'Guns, Germs, and Steel', 3, 1997, 26.99, 'History', 48, 10),
+('9780143038580', 'Team of Rivals', 1, 2005, 22.00, 'History', 35, 8),
+('9780060838676', 'The Rise and Fall of the Third Reich', 3, 1960, 25.99, 'History', 28, 6),
+('9780679720201', '1776', 3, 2005, 18.00, 'History', 42, 10),
+('9780307352156', 'Unbroken', 1, 2010, 18.00, 'History', 65, 12),
+('9780307887436', 'The Warmth of Other Suns', 1, 2010, 18.99, 'History', 38, 8),
+('9780735211292', 'Atomic Habits', 1, 2018, 27.00, 'History', 120, 25),
+('9780525434290', 'The Splendid and the Vile', 1, 2020, 19.99, 'History', 55, 12),
+
+-- Religion
+('9780807067048', 'Mans Search for Meaning', 1, 1946, 14.99, 'Religion', 45, 10),
 ('9780345384560', 'A History of God', 1, 1993, 21.50, 'Religion', 35, 8),
-('9780393354324', 'Guns, Germs, and Steel', 3, 1997, 26.99, 'Geography', 48, 10),
-('9780141439518', 'The Origin of Species', 1, 1859, 15.99, 'Science', 30, 8),
+('9780060652937', 'Mere Christianity', 2, 1952, 15.99, 'Religion', 50, 10),
+('9780061120084', 'The Alchemist', 2, 1988, 16.99, 'Religion', 90, 18),
+('9780062511409', 'The Monk Who Sold His Ferrari', 2, 1997, 17.00, 'Religion', 45, 10),
+('9780062457714', 'The Seven Spiritual Laws of Success', 1, 1994, 14.00, 'Religion', 40, 8),
+('9780553109535', 'The Art of Happiness', 1, 1998, 16.00, 'Religion', 55, 12),
+('9780743223188', 'The Purpose Driven Life', 3, 2002, 17.99, 'Religion', 60, 12),
+('9780062515872', 'The Untethered Soul', 2, 2007, 17.99, 'Religion', 48, 10),
+('9780062236845', 'Daring Greatly', 1, 2012, 18.00, 'Religion', 52, 10),
+
+-- Art (Literature/Fiction)
 ('9780452284234', 'The Alchemist', 2, 1988, 14.99, 'Art', 65, 15),
 ('9780316769488', 'The Catcher in the Rye', 3, 1951, 13.99, 'Art', 55, 12),
-('9780525478812', 'Educated', 1, 2018, 27.00, 'History', 70, 15),
-('9780679783268', 'Pride and Prejudice', 4, 1813, 12.99, 'Art', 40, 10);
+('9780679783268', 'Pride and Prejudice', 4, 1813, 12.99, 'Art', 40, 10),
+('9780451524935', '1984', 1, 1949, 15.99, 'Art', 85, 18),
+('9780061120084', 'To Kill a Mockingbird', 2, 1960, 16.99, 'Art', 95, 20),
+('9780743273565', 'The Great Gatsby', 3, 1925, 15.00, 'Art', 70, 15),
+('9780141439600', 'Great Expectations', 1, 1861, 12.99, 'Art', 35, 8),
+('9780140449136', 'Crime and Punishment', 1, 1866, 16.00, 'Art', 42, 10),
+('9780140449242', 'War and Peace', 1, 1869, 20.00, 'Art', 30, 6),
+('9780060883287', 'One Hundred Years of Solitude', 2, 1967, 17.00, 'Art', 48, 10),
+('9780439708180', 'Harry Potter and the Sorcerers Stone', 6, 1997, 12.99, 'Art', 150, 30),
+('9780439064873', 'Harry Potter and the Chamber of Secrets', 6, 1998, 12.99, 'Art', 140, 28),
+('9780439136365', 'Harry Potter and the Prisoner of Azkaban', 6, 1999, 12.99, 'Art', 135, 27),
+('9780547928227', 'The Hobbit', 4, 1937, 15.99, 'Art', 80, 16),
+('9780544003415', 'The Lord of the Rings', 4, 1954, 35.00, 'Art', 60, 12),
+('9780007141326', 'The Lion, the Witch and the Wardrobe', 2, 1950, 12.99, 'Art', 55, 12),
+('9780553293357', 'Foundation', 1, 1951, 17.00, 'Art', 45, 10),
+('9780307474728', 'The Da Vinci Code', 1, 2003, 17.00, 'Art', 75, 15),
+('9780062073488', 'Murder on the Orient Express', 2, 2011, 15.99, 'Art', 50, 10),
+('9781501142970', 'It', 3, 1986, 19.99, 'Art', 55, 12),
+('9780385333481', 'The Shining', 1, 1977, 17.00, 'Art', 48, 10),
+('9780307744432', 'The Girl with the Dragon Tattoo', 1, 2005, 17.00, 'Art', 60, 12),
+('9780143127550', 'The Handmaids Tale', 1, 1985, 16.00, 'Art', 65, 14),
+('9780307387899', 'The Road', 1, 2006, 16.00, 'Art', 42, 10),
+('9780316055437', 'The Secret History', 1, 1992, 18.00, 'Art', 38, 8),
+('9781501110368', 'It Ends with Us', 3, 2016, 17.99, 'Art', 110, 22),
+('9781668001226', 'It Starts with Us', 3, 2022, 18.99, 'Art', 95, 20),
+('9780735222359', 'Where the Crawdads Sing', 1, 2018, 18.00, 'Art', 85, 18),
+('9780593321201', 'Tomorrow and Tomorrow and Tomorrow', 1, 2022, 28.00, 'Art', 70, 15),
+('9781501161933', 'The Seven Husbands of Evelyn Hugo', 3, 2017, 17.00, 'Art', 90, 18),
+
+-- Geography
+('9780393354324', 'Guns, Germs, and Steel', 3, 1997, 26.99, 'Geography', 48, 10),
+('9780062316097', 'Homo Deus', 2, 2017, 24.99, 'Geography', 55, 12),
+('9780374533557', 'Thinking, Fast and Slow', 4, 2011, 18.00, 'Geography', 60, 12),
+('9780316346627', 'Outliers: The Story of Success', 3, 2008, 17.99, 'Geography', 65, 14),
+('9780316017930', 'Outliers', 3, 2008, 18.99, 'Geography', 70, 15),
+('9780062457714', 'The Power of Habit', 1, 2012, 18.00, 'Geography', 75, 15),
+('9780525559474', 'Range: Why Generalists Triumph', 1, 2019, 17.99, 'Geography', 50, 10),
+('9780593135204', 'Think Again', 1, 2021, 28.00, 'Geography', 65, 14),
+('9780525429586', 'Deep Work', 1, 2016, 18.00, 'Geography', 55, 12),
+('9780143126560', 'Quiet: The Power of Introverts', 1, 2012, 18.00, 'Geography', 58, 12);
 
 -- Link Books to Authors
 INSERT INTO BOOK_AUTHORS (book_isbn, author_id) VALUES
-('9780553380163', 1),
-('9780062316110', 2),
-('9780316346627', 3),
-('9781524763138', 4),
-('9780399590504', 5),
-('9780807067048', 6),
-('9780345539434', 7),
-('9780062694690', 8),
-('9780345384560', 9),
-('9780393354324', 10),
-('9780141439518', 1),  
-('9780452284234', 2),  -- Multiple authors possible
-('9780316769488', 3),
-('9780525478812', 5),
-('9780679783268', 4);
+-- Science books
+('9780553380163', 1),  -- A Brief History of Time - Stephen Hawking
+('9780345539434', 7),  -- Cosmos - Carl Sagan
+('9780141439518', 1),  -- Origin of Species - (using Hawking as placeholder)
+('9780062316097', 2),  -- Sapiens - Yuval Noah Harari
+('9780374533557', 3),  -- Thinking Fast and Slow - (using Gladwell as placeholder)
+
+-- History books
+('9780062316110', 2),  -- Sapiens - Yuval Noah Harari
+('9781524763138', 4),  -- Becoming - Michelle Obama
+('9780399590504', 5),  -- Educated - Tara Westover
+('9780062694690', 8),  -- A People's History - Howard Zinn
+('9780393354324', 10), -- Guns, Germs, Steel - Jared Diamond
+('9780735211292', 45), -- Atomic Habits - James Clear
+
+-- Religion books
+('9780807067048', 6),  -- Man's Search for Meaning - Viktor Frankl
+('9780345384560', 9),  -- A History of God - Karen Armstrong
+('9780060652937', 27), -- Mere Christianity - C.S. Lewis
+('9780061120084', 22), -- The Alchemist - Paulo Coelho
+('9780062236845', 49), -- Daring Greatly - Brene Brown
+
+-- Art/Literature books
+('9780452284234', 22), -- The Alchemist - Paulo Coelho
+('9780316769488', 17), -- Catcher in the Rye - (using Hemingway placeholder)
+('9780679783268', 15), -- Pride and Prejudice - Jane Austen
+('9780451524935', 12), -- 1984 - George Orwell
+('9780061120084', 13), -- To Kill a Mockingbird - Harper Lee
+('9780743273565', 14), -- The Great Gatsby - F. Scott Fitzgerald
+('9780141439600', 18), -- Great Expectations - Charles Dickens
+('9780140449136', 20), -- Crime and Punishment - Dostoevsky
+('9780140449242', 19), -- War and Peace - Leo Tolstoy
+('9780060883287', 21), -- One Hundred Years of Solitude - Gabriel Garcia Marquez
+('9780439708180', 11), -- Harry Potter 1 - J.K. Rowling
+('9780439064873', 11), -- Harry Potter 2 - J.K. Rowling
+('9780439136365', 11), -- Harry Potter 3 - J.K. Rowling
+('9780547928227', 26), -- The Hobbit - J.R.R. Tolkien
+('9780544003415', 26), -- Lord of the Rings - J.R.R. Tolkien
+('9780007141326', 27), -- Narnia - C.S. Lewis
+('9780553293357', 28), -- Foundation - Isaac Asimov
+('9780307474728', 23), -- Da Vinci Code - Dan Brown
+('9780062073488', 24), -- Murder Orient Express - Agatha Christie
+('9781501142970', 25), -- It - Stephen King
+('9780385333481', 25), -- The Shining - Stephen King
+('9780143127550', 41), -- Handmaid's Tale - Margaret Atwood
+('9780307387899', 42), -- The Road - Cormac McCarthy
+('9780316055437', 43), -- Secret History - Donna Tartt
+('9781501110368', 44), -- It Ends with Us - Colleen Hoover
+('9781668001226', 44), -- It Starts with Us - Colleen Hoover
+('9781501161933', 44), -- Seven Husbands - (using Hoover placeholder)
+
+-- Geography/Self-help books
+('9780316346627', 3),  -- Outliers - Malcolm Gladwell
+('9780316017930', 3),  -- Outliers - Malcolm Gladwell
+('9780525559474', 50), -- Range - Adam Grant
+('9780593135204', 50), -- Think Again - Adam Grant
+('9780525429586', 46); -- Deep Work - Cal Newport
 
 -- Insert Sample Customers (password: Customer123!)
 INSERT INTO USERS (username, password_hash, email, first_name, last_name, phone_number, address, user_type)
@@ -346,17 +499,77 @@ CREATE TABLE PASSWORD_RESET_TOKENS (
 
 -- Sample Reviews
 INSERT INTO BOOK_REVIEWS (book_isbn, user_id, rating, review_title, review_text) VALUES
+-- Science books
 ('9780553380163', 2, 5, 'Mind-blowing!', 'Stephen Hawking makes complex physics accessible to everyone. A must-read for anyone curious about the universe.'),
 ('9780553380163', 3, 4, 'Great but challenging', 'Excellent book but some parts require multiple reads to fully understand.'),
+('9780345539434', 2, 5, 'A masterpiece of science communication', 'Carl Sagan takes you on a journey through the cosmos with poetic prose and scientific rigor.'),
+('9780345539434', 4, 5, 'Changed how I see the universe', 'This book sparked my love for astronomy. Beautifully written.'),
+
+-- History books
 ('9780062316110', 2, 5, 'Changed my perspective', 'Yuval Noah Harari brilliantly traces the history of our species. Thought-provoking and well-researched.'),
 ('9780062316110', 4, 5, 'Essential reading', 'Everyone should read this book. It will change how you see human history.'),
-('9780316346627', 3, 4, 'Insightful', 'Malcolm Gladwell presents fascinating case studies about success. Very engaging read.'),
-('9781524763138', 5, 5, 'Inspiring memoir', 'Michelle Obama shares her journey with grace and honesty. Truly inspiring.');
+('9780062316110', 5, 4, 'Fascinating but dense', 'Incredible insights but takes time to digest. Worth every minute.'),
+('9781524763138', 5, 5, 'Inspiring memoir', 'Michelle Obama shares her journey with grace and honesty. Truly inspiring.'),
+('9781524763138', 3, 5, 'Beautifully written', 'Her story is powerful and relatable. A must-read for everyone.'),
+('9780399590504', 2, 5, 'Unforgettable', 'Tara Westover story of self-invention is both harrowing and inspiring.'),
+('9780735211292', 3, 5, 'Life-changing!', 'Atomic Habits gave me practical tools to build better habits. Already seeing results!'),
+('9780735211292', 4, 5, 'Best self-improvement book ever', 'James Clear breaks down habit formation into actionable steps. Highly recommend.'),
+('9780735211292', 5, 4, 'Practical and insightful', 'Great framework for understanding how habits work and how to change them.'),
+
+-- Religion/Philosophy books
+('9780807067048', 2, 5, 'Life-changing book', 'Viktor Frankl perspective on finding meaning even in the darkest times is profound.'),
+('9780807067048', 3, 5, 'Required reading for humanity', 'This book should be required reading. It teaches resilience and hope.'),
+('9780061120084', 4, 5, 'A beautiful journey', 'The Alchemist is a timeless tale about following your dreams. Magical.'),
+('9780061120084', 5, 4, 'Inspirational', 'Simple yet profound. The story stays with you long after you finish.'),
+('9780060652937', 2, 4, 'Clear and compelling', 'C.S. Lewis makes a strong case for Christianity in accessible language.'),
+
+-- Fiction classics
+('9780451524935', 2, 5, 'Terrifyingly relevant', 'Orwell vision of totalitarianism feels more relevant than ever. A masterpiece.'),
+('9780451524935', 3, 5, 'A warning for all generations', 'This book should be required reading. The themes are timeless.'),
+('9780451524935', 4, 4, 'Chilling and thought-provoking', 'Disturbing in the best way. Makes you think about freedom and truth.'),
+('9780743273565', 3, 5, 'The Great American Novel', 'Fitzgerald prose is beautiful. The story of Gatsby is tragic and timeless.'),
+('9780743273565', 5, 4, 'Beautifully written', 'The writing is exquisite. A snapshot of the Jazz Age at its finest.'),
+('9780679783268', 2, 5, 'Timeless romance', 'Jane Austen wit and social commentary are as fresh today as 200 years ago.'),
+('9780679783268', 4, 5, 'Perfect in every way', 'Elizabeth Bennet is one of the best characters in literature. Love this book.'),
+
+-- Harry Potter series
+('9780439708180', 2, 5, 'Magic never gets old', 'Reading this as an adult is just as magical as when I was a kid.'),
+('9780439708180', 3, 5, 'The book that started it all', 'J.K. Rowling created a world that generations will love forever.'),
+('9780439708180', 4, 5, 'Perfect for all ages', 'Introduced my kids to Harry Potter and now we are all hooked!'),
+('9780439708180', 5, 4, 'Wonderful beginning', 'Great start to an amazing series. The world-building is fantastic.'),
+('9780547928227', 2, 5, 'A perfect adventure', 'Tolkien created the template for all fantasy. Still the best.'),
+('9780547928227', 3, 5, 'Timeless classic', 'The Hobbit is pure joy. Bilbo journey is unforgettable.'),
+('9780544003415', 4, 5, 'The greatest fantasy ever written', 'Nothing compares to Middle-earth. A masterwork of imagination.'),
+
+-- Modern bestsellers
+('9781501110368', 3, 5, 'Emotionally devastating', 'Colleen Hoover knows how to write emotion. I could not put it down.'),
+('9781501110368', 5, 4, 'Powerful story', 'Deals with difficult topics with sensitivity. Very moving.'),
+('9781501161933', 2, 5, 'Best book I read this year', 'Evelyn Hugo story is captivating. The twists kept me guessing.'),
+('9781501161933', 4, 5, 'Unforgettable characters', 'Hollywood glamour with real depth. Absolutely loved it.'),
+('9780307474728', 3, 4, 'Page-turner', 'Dan Brown knows how to keep you hooked. Great thriller.'),
+('9780062073488', 2, 5, 'The queen of mystery', 'Agatha Christie at her finest. The ending is legendary.'),
+('9781501142970', 4, 4, 'Terrifying masterpiece', 'Stephen King at his best. Pennywise will haunt your dreams.'),
+('9780143127550', 5, 5, 'Prophetic and chilling', 'Margaret Atwood wrote a warning. Unfortunately still relevant.'),
+
+-- Self-help/Business
+('9780316346627', 2, 5, 'Eye-opening', 'Malcolm Gladwell makes you see success differently. Fascinating research.'),
+('9780316346627', 4, 4, 'Thought-provoking', 'Interesting perspective on what makes people successful.'),
+('9780525429586', 3, 5, 'Essential for the modern age', 'Cal Newport makes a compelling case for focused work. Game-changer.'),
+('9780593135204', 2, 5, 'Changed how I think', 'Adam Grant challenges you to reconsider your opinions. Brilliant.');
 
 -- Sample Wishlist items
 INSERT INTO WISHLISTS (user_id, book_isbn) VALUES
 (2, '9780345539434'),
 (2, '9780393354324'),
+(2, '9780439708180'),
+(2, '9780735211292'),
 (3, '9780062316110'),
-(4, '9780553380163');
+(3, '9780544003415'),
+(3, '9781501161933'),
+(4, '9780553380163'),
+(4, '9780451524935'),
+(4, '9780061120084'),
+(5, '9780743273565'),
+(5, '9780547928227'),
+(5, '9780525429586');
 
