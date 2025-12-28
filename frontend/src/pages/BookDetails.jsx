@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from 'react-query'
-import { FiHeart, FiShoppingCart } from 'react-icons/fi'
+import { FiHeart, FiShoppingCart, FiBook } from 'react-icons/fi'
 import { booksAPI, wishlistAPI } from '../services/api'
 import Loading from '../components/Loading'
 import BookReviews from '../components/BookReviews'
@@ -14,6 +14,7 @@ const BookDetails = () => {
   const queryClient = useQueryClient()
   const { isAuthenticated, isCustomer } = useAuth()
   const { addToCart } = useCart()
+  const [imageError, setImageError] = useState(false)
 
   const {
     data,
@@ -86,68 +87,83 @@ const BookDetails = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex items-start justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">{book.title}</h1>
-          <p className="text-gray-600 mt-1">ISBN: {book.isbn}</p>
-        </div>
-        <div className="text-right">
-          <div className="text-3xl font-bold text-primary-600">${book.price}</div>
-          <div className="text-sm text-gray-600">In stock: {book.quantity_in_stock}</div>
-        </div>
-      </div>
+      <div className="card mb-6">
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Book Cover */}
+          <div className="flex-shrink-0">
+            {!imageError ? (
+              <img
+                src={book.cover_image || `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`}
+                alt={book.title}
+                className="w-48 h-72 object-cover rounded-lg shadow-lg mx-auto md:mx-0"
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <div className="w-48 h-72 bg-gradient-to-br from-primary-100 to-primary-200 rounded-lg flex items-center justify-center shadow-lg mx-auto md:mx-0">
+                <FiBook className="text-6xl text-primary-600" />
+              </div>
+            )}
+          </div>
 
-      <div className="card">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <div className="text-sm text-gray-500">Authors</div>
-            <div className="font-medium">{book.authors || '—'}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Publisher</div>
-            <div className="font-medium">{book.publisher_name || '—'}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Category</div>
-            <div className="font-medium">{book.category || '—'}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Publication Year</div>
-            <div className="font-medium">{book.publication_year || '—'}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Threshold Quantity</div>
-            <div className="font-medium">{book.threshold_quantity ?? '—'}</div>
-          </div>
-        </div>
+          {/* Book Info */}
+          <div className="flex-grow">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h1 className="text-3xl font-bold">{book.title}</h1>
+                <p className="text-gray-600 mt-1">ISBN: {book.isbn}</p>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-primary-600">${book.price}</div>
+                <div className="text-sm text-gray-600">In stock: {book.quantity_in_stock}</div>
+              </div>
+            </div>
 
-        <div className="mt-6 flex flex-wrap gap-3">
-          {isAuthenticated && isCustomer ? (
-            <>
-              <button
-                type="button"
-                className="btn btn-primary flex items-center gap-2"
-                onClick={() => addToCart(book.isbn, 1)}
-              >
-                <FiShoppingCart />
-                Add to Cart
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => {
-                  addToCart(book.isbn, 1)
-                  navigate('/cart')
-                }}
-              >
-                Go to Cart
-              </button>
-              <button
-                type="button"
-                className={`btn flex items-center gap-2 ${
-                  inWishlist
-                    ? 'bg-red-100 text-red-600 hover:bg-red-200'
-                    : 'btn-secondary'
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div>
+                <div className="text-sm text-gray-500">Authors</div>
+                <div className="font-medium">{book.authors || '—'}</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">Publisher</div>
+                <div className="font-medium">{book.publisher_name || '—'}</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">Category</div>
+                <div className="font-medium">{book.category || '—'}</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">Publication Year</div>
+                <div className="font-medium">{book.publication_year || '—'}</div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              {isAuthenticated && isCustomer ? (
+                <>
+                  <button
+                    type="button"
+                    className="btn btn-primary flex items-center gap-2"
+                    onClick={() => addToCart(book.isbn, 1)}
+                  >
+                    <FiShoppingCart />
+                    Add to Cart
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      addToCart(book.isbn, 1)
+                      navigate('/cart')
+                    }}
+                  >
+                    Go to Cart
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn flex items-center gap-2 ${
+                      inWishlist
+                        ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                        : 'btn-secondary'
                 }`}
                 onClick={() =>
                   inWishlist
@@ -163,6 +179,8 @@ const BookDetails = () => {
             <Link to="/login" className="btn btn-primary">Login to buy</Link>
           )}
           <Link to="/books" className="btn btn-secondary">Back</Link>
+            </div>
+          </div>
         </div>
       </div>
 

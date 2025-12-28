@@ -1,20 +1,33 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FiBook } from 'react-icons/fi'
 
 const BookCard = ({ book }) => {
-  const { isbn, title, price, category, quantity_in_stock, publisher_name, authors } = book
+  const { isbn, title, price, category, quantity_in_stock, publisher_name, authors, cover_image } = book
+  const [imageError, setImageError] = useState(false)
 
   const inStock = quantity_in_stock > 0
+
+  // Fallback to Open Library cover if no cover_image or image fails to load
+  const coverUrl = cover_image || `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`
 
   return (
     <Link to={`/books/${isbn}`} className="block">
       <div className="card hover:shadow-lg transition-shadow duration-200 h-full">
-        {/* Book Icon */}
+        {/* Book Cover */}
         <div className="flex justify-center mb-4">
-          <div className="w-32 h-40 bg-gradient-to-br from-primary-100 to-primary-200 rounded-lg flex items-center justify-center">
-            <FiBook className="text-5xl text-primary-600" />
-          </div>
+          {!imageError ? (
+            <img
+              src={coverUrl}
+              alt={title}
+              className="w-32 h-48 object-cover rounded-lg shadow-md"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="w-32 h-48 bg-gradient-to-br from-primary-100 to-primary-200 rounded-lg flex items-center justify-center shadow-md">
+              <FiBook className="text-5xl text-primary-600" />
+            </div>
+          )}
         </div>
 
         {/* Book Info */}
