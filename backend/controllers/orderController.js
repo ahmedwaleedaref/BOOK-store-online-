@@ -1,5 +1,7 @@
 const { query, transaction } = require('../config/database');
 const { validateCard } = require('../utils/creditCard');
+const { sendOrderConfirmation } = require('../services/emailService');
+const { generateInvoice } = require('../services/invoiceService');
 
 const placeOrder = async (req, res, next) => {
   try {
@@ -25,13 +27,13 @@ const placeOrder = async (req, res, next) => {
       });
     }
 
+    let orderItems = [];
     const orderId = await transaction(async (conn) => {
       let totalAmount = 0;
-      const orderItems = [];
 
       for (const item of items) {
         const [rows] = await conn.query(
-          'SELECT isbn, price, quantity_in_stock FROM BOOKS WHERE isbn = ?',
+          'SELECT isbn, title, price, quantity_in_stock FROM BOOKS WHERE isbn = ?',
           [item.isbn]
         );
 
@@ -53,6 +55,7 @@ const placeOrder = async (req, res, next) => {
 
         orderItems.push({
           isbn: item.isbn,
+          title: book.title,
           quantity: item.quantity,
           price: book.price
         });
@@ -78,12 +81,29 @@ const placeOrder = async (req, res, next) => {
       return newOrderId;
     });
 
+    // Get user info for email
+    const users = await query(
+      'SELECT username, email, first_name, last_name, address FROM USERS WHERE user_id = ?',
+      [userId]
+    );
+    const user = users[0];
+
+    // Get order details for email
+    const orders = await query(
+      'SELECT order_id, order_date, total_amount, credit_card_number FROM CUSTOMER_ORDERS WHERE order_id = ?',
+      [orderId]
+    );
+    const order = { ...orders[0], items: orderItems.map(item => ({ ...item, book_isbn: item.isbn, price_at_purchase: item.price })) };
+
+    // Send confirmation email (async, don't wait)
+    sendOrderConfirmation(order, user).catch(err => console.error('Email error:', err));
+
     res.status(201).json({
       success: true,
       message: 'Order placed successfully',
       data: {
         orderId,
-        message: 'Your order has been confirmed'
+        message: 'Your order has been confirmed. A confirmation email has been sent.'
       }
     });
   } catch (error) {
@@ -300,6 +320,54 @@ const placePublisherOrder = async (req, res, next) => {
   }
 };
 
+// Download invoice PDF
+const downloadInvoice = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const userId = req.user.userId;
+
+    // Get order details
+    const orders = await query(
+      'SELECT order_id, order_date, total_amount, credit_card_number, credit_card_expiry FROM CUSTOMER_ORDERS WHERE order_id = ? AND user_id = ?',
+      [orderId, userId]
+    );
+
+    if (orders.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found or unauthorized'
+      });
+    }
+
+    // Get order items
+    const items = await query(
+      `SELECT oi.book_isbn, b.title, oi.quantity, oi.price_at_purchase
+       FROM ORDER_ITEMS oi
+       JOIN BOOKS b ON oi.book_isbn = b.isbn
+       WHERE oi.order_id = ?`,
+      [orderId]
+    );
+
+    // Get user info
+    const users = await query(
+      'SELECT username, email, first_name, last_name, address FROM USERS WHERE user_id = ?',
+      [userId]
+    );
+
+    const order = { ...orders[0], items };
+    const user = users[0];
+
+    // Generate PDF
+    const pdfBuffer = await generateInvoice(order, user);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=invoice-${orderId}.pdf`);
+    res.send(pdfBuffer);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   placeOrder,
   viewPastOrders,
@@ -307,5 +375,6 @@ module.exports = {
   getAllOrders,
   viewPublisherOrders,
   confirmPublisherOrder,
-  placePublisherOrder
+  placePublisherOrder,
+  downloadInvoice
 };

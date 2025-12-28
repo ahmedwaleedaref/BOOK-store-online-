@@ -18,6 +18,9 @@ import MyOrders from './pages/MyOrders'
 import OrderDetails from './pages/OrderDetails'
 import Cart from './pages/Cart'
 import Profile from './pages/Profile'
+import Wishlist from './pages/Wishlist'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 
 import AdminDashboard from './pages/admin/Dashboard'
 import AdminBooks from './pages/admin/Books'
@@ -43,6 +46,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/books" element={isAdmin ? <Navigate to="/admin" replace /> : <Books />} />
           <Route path="/books/:isbn" element={isAdmin ? <Navigate to="/admin" replace /> : <BookDetails />} />
 
@@ -84,6 +89,14 @@ function App() {
             element={
               <PrivateRoute requireCustomer>
                 <OrderDetails />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/wishlist"
+            element={
+              <PrivateRoute requireCustomer>
+                <Wishlist />
               </PrivateRoute>
             }
           />

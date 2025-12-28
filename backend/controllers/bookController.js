@@ -150,6 +150,130 @@ const searchBooks = async (req, res, next) => {
   }
 };
 
+// Full-text search across all fields (Amazon-like search)
+const fullTextSearch = async (req, res, next) => {
+  try {
+    const { q, category, minPrice, maxPrice, inStock, sortBy, order } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+
+    if (!q || q.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Search query is required'
+      });
+    }
+
+    const searchTerm = q.trim();
+    const searchPattern = `%${searchTerm}%`;
+
+    // Build dynamic WHERE clause
+    let whereConditions = [`(
+      b.title LIKE ? OR 
+      b.isbn LIKE ? OR 
+      p.publisher_name LIKE ? OR 
+      b.category LIKE ? OR
+      a.author_name LIKE ?
+    )`];
+    let params = [searchPattern, searchPattern, searchPattern, searchPattern, searchPattern];
+
+    // Optional filters
+    if (category) {
+      whereConditions.push('b.category = ?');
+      params.push(category);
+    }
+
+    if (minPrice) {
+      whereConditions.push('b.price >= ?');
+      params.push(parseFloat(minPrice));
+    }
+
+    if (maxPrice) {
+      whereConditions.push('b.price <= ?');
+      params.push(parseFloat(maxPrice));
+    }
+
+    if (inStock === 'true') {
+      whereConditions.push('b.quantity_in_stock > 0');
+    }
+
+    const whereClause = whereConditions.join(' AND ');
+
+    // Sort options
+    let orderClause = 'ORDER BY ';
+    switch (sortBy) {
+      case 'price':
+        orderClause += `b.price ${order === 'desc' ? 'DESC' : 'ASC'}`;
+        break;
+      case 'title':
+        orderClause += `b.title ${order === 'desc' ? 'DESC' : 'ASC'}`;
+        break;
+      case 'year':
+        orderClause += `b.publication_year ${order === 'desc' ? 'DESC' : 'ASC'}`;
+        break;
+      default:
+        // Relevance: prioritize exact matches
+        orderClause += `
+          CASE 
+            WHEN b.title LIKE ? THEN 1
+            WHEN b.title LIKE ? THEN 2
+            ELSE 3
+          END, b.title ASC`;
+        params.push(`${searchTerm}%`, `%${searchTerm}%`);
+    }
+
+    const sql = `
+      SELECT b.*, p.publisher_name,
+             GROUP_CONCAT(DISTINCT a.author_name SEPARATOR ', ') AS authors
+      FROM BOOKS b
+      JOIN PUBLISHERS p ON b.publisher_id = p.publisher_id
+      LEFT JOIN BOOK_AUTHORS ba ON b.isbn = ba.book_isbn
+      LEFT JOIN AUTHORS a ON ba.author_id = a.author_id
+      WHERE ${whereClause}
+      GROUP BY b.isbn, p.publisher_name
+      ${orderClause}
+      LIMIT ? OFFSET ?
+    `;
+    params.push(limit, offset);
+
+    const results = await query(sql, params);
+
+    // Count total results for pagination
+    const countSql = `
+      SELECT COUNT(DISTINCT b.isbn) AS total
+      FROM BOOKS b
+      JOIN PUBLISHERS p ON b.publisher_id = p.publisher_id
+      LEFT JOIN BOOK_AUTHORS ba ON b.isbn = ba.book_isbn
+      LEFT JOIN AUTHORS a ON ba.author_id = a.author_id
+      WHERE ${whereClause}
+    `;
+    const countParams = params.slice(0, -2); // Remove LIMIT and OFFSET params
+    if (sortBy === undefined) {
+      // Remove the relevance sort params too
+      countParams.splice(-2, 2);
+    }
+    const countResult = await query(countSql, countParams);
+    const total = countResult[0]?.total || 0;
+
+    res.json({
+      success: true,
+      data: {
+        books: results,
+        query: searchTerm,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Get book by ISBN
 const getBookByIsbn = async (req, res, next) => {
   try {
@@ -274,6 +398,7 @@ module.exports = {
   addBook,
   updateBook,
   searchBooks,
+  fullTextSearch,
   getBookByIsbn,
   getAllBooks,
   getBooksByCategory,

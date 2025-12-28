@@ -1,46 +1,55 @@
 # Bookstore Online
 
-Full-stack bookstore application with a **React (Vite) + Tailwind** frontend and a **Node.js (Express) + MySQL** backend.
+[![CI/CD Pipeline](https://github.com/YOUR_USERNAME/BOOK-store-online-/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/BOOK-store-online-/actions/workflows/ci.yml)
 
-This project supports a **shopping cart + checkout** flow for customers. The database includes triggers for stock validation, stock deduction, and auto-reorder behavior.
+Full-stack e-commerce bookstore application with a **React (Vite) + Tailwind** frontend and a **Node.js (Express) + MySQL** backend.
 
-## Features
+This project features a complete shopping experience with cart, checkout, wishlists, reviews, recommendations, and PDF invoices. The database includes triggers for stock validation, stock deduction, and auto-reorder behavior.
 
-### Customer
-- Browse books, filter by category, view book details
-- Manage shopping cart:
-	- Add books to cart
-	- View cart items
-	- View individual and total prices
-	- Remove items / update quantities
-- Checkout cart:
-	- Provide credit card number + expiry date (validated)
-	- Stock is deducted after purchase (via DB triggers)
-- Edit personal information (profile) and change password
-- View order history and order details
+## ✨ Key Features
 
-### Admin
-- Dashboard stats (books/customers/orders/revenue)
-- Manage publishers and authors (CRUD)
-- Manage books (create, update price/stock)
-- View customer orders
-- View/confirm publisher orders and create manual publisher orders
-- Reports: previous-month sales, sales by date, top customers, top books, inventory status, reorder counts
+### 🔍 Smart Search
+- **Full-text search** across title, author, publisher, ISBN, and category
+- **Advanced filters**: category, price range, availability
+- **Sorting**: by relevance, price, title, or publication year
 
-### Database / Triggers
-The database schema (see [backend/bookstore.sql](backend/bookstore.sql)) includes triggers such as:
-- Prevent negative stock on updates
-- Auto-create publisher orders when stock drops below threshold
-- Validate stock before inserting order items
-- Deduct stock after a sale
-- Increase stock when a publisher order is confirmed
+### 💜 Customer Experience
+- **Wishlist**: Save books for later purchase
+- **Reviews & Ratings**: 5-star rating system with detailed reviews
+- **Personalized Recommendations**: "Customers who bought this also bought..."
+- **PDF Invoices**: Download professional invoices for orders
+- **Email Notifications**: Order confirmation emails with attached invoices
+- **Password Reset**: Secure password recovery via email
 
-**Payment storage note:** the backend validates the credit card input during checkout and stores only a **masked** card number (e.g. `**** **** **** 4242`) and an expiry string on the order record. It does **not** store full card numbers.
+### 🛒 E-Commerce
+- Shopping cart with quantity management
+- Secure checkout with credit card validation
+- Order history with detailed item breakdown
+- Real-time stock validation via database triggers
+
+### 👨‍💼 Admin Dashboard
+- Sales analytics and reports
+- Inventory management with auto-reorder alerts
+- Publisher order management
+- Customer and order insights
+
+### 🔧 Technical Highlights
+- **API Documentation**: Interactive Swagger UI at `/api-docs`
+- **Unit Tests**: Jest test suite with coverage reporting
+- **CI/CD Pipeline**: GitHub Actions for automated testing and builds
+- **Docker Support**: One-command deployment with Docker Compose
+- **Database Triggers**: 5 MySQL triggers for business logic
 
 ## Tech Stack
-- **Backend:** Node.js, Express, mysql2, JWT auth
-- **Frontend:** React, Vite, Tailwind, React Query, Axios
-- **Infra:** Docker Compose (MySQL + backend + frontend + phpMyAdmin)
+
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | React 18, Vite, Tailwind CSS, React Query, Axios |
+| **Backend** | Node.js, Express, MySQL, JWT, Nodemailer, PDFKit |
+| **Database** | MySQL 8 with triggers and stored procedures |
+| **DevOps** | Docker Compose, GitHub Actions CI/CD |
+| **Testing** | Jest, Supertest |
+| **Docs** | Swagger/OpenAPI |
 
 ## Quick Start (Docker Compose)
 
@@ -119,6 +128,8 @@ The SQL seed data includes demo users:
 
 Base URL: `http://localhost:3000/api`
 
+📖 **Interactive API Docs**: `http://localhost:3000/api-docs`
+
 ### Auth (`/api/auth`)
 - `POST /register`
 - `POST /login`
@@ -127,20 +138,40 @@ Base URL: `http://localhost:3000/api`
 - `PUT /change-password` (auth)
 - `POST /logout` (auth)
 
+### Password Reset (`/api/password-reset`)
+- `POST /request` - Request password reset email
+- `GET /verify/:token` - Verify reset token
+- `POST /reset` - Reset password with token
+
 ### Books (`/api/books`)
 - `GET /` (pagination: `page`, `limit`)
 - `GET /categories`
+- `GET /full-search?q=...` (full-text search with filters: `category`, `minPrice`, `maxPrice`, `inStock`, `sortBy`, `order`, `page`, `limit`)
 - `GET /category/:category`
 - `GET /search?type=...&value=...`
 - `GET /:isbn`
 - `POST /` (admin)
 - `PUT /:isbn` (admin)
 
+### Wishlist (`/api/wishlist`) (auth)
+- `GET /` - Get user's wishlist
+- `POST /` - Add book to wishlist
+- `GET /:isbn` - Check if book is in wishlist
+- `DELETE /:isbn` - Remove from wishlist
+
+### Reviews (`/api/reviews`)
+- `GET /book/:isbn` - Get reviews for a book
+- `GET /book/:isbn/my-review` (auth) - Get user's review
+- `POST /book/:isbn` (auth) - Create/update review
+- `DELETE /book/:isbn` (auth) - Delete review
+- `GET /recommendations` (auth) - Get personalized recommendations
+
 ### Orders (`/api/orders`)
-- `POST /place-order` (customer)
+- `POST /place-order` (customer) - Place order with email confirmation
 	- body: `items: [{ isbn, quantity }]`, `credit_card_number`, `credit_card_expiry`
 - `GET /my-orders` (customer)
 - `GET /my-orders/:orderId` (customer)
+- `GET /my-orders/:orderId/invoice` (customer) - Download PDF invoice
 - `GET /` (admin, paginated)
 - `GET /publisher-orders?status=pending|confirmed` (admin)
 - `POST /publisher-orders` (admin)
@@ -156,23 +187,59 @@ Base URL: `http://localhost:3000/api`
 - `GET /books/:isbn/reorders`
 - `GET /inventory/status`
 
+## Testing
+
+```bash
+cd backend
+npm test              # Run tests
+npm run test:watch    # Watch mode
+npm run test:coverage # With coverage report
+```
+
 ## Project Structure
 
 ```text
-backend/   Express API + MySQL integration
-frontend/  React UI (Vite + Tailwind)
-docker/    Dockerfiles used by docker-compose
+backend/
+├── controllers/     # Route handlers
+├── routes/          # API routes
+├── middleware/      # Auth, validation
+├── services/        # Email, PDF generation
+├── tests/           # Jest test suites
+├── swagger/         # API documentation
+└── bookstore.sql    # Database schema
+
+frontend/
+├── src/
+│   ├── components/  # Reusable UI components
+│   ├── pages/       # Route pages
+│   ├── context/     # React Context providers
+│   └── services/    # API client
+
+.github/workflows/   # CI/CD pipeline
+docker/              # Dockerfiles
 ```
 
 ## UI Routes (Frontend)
 
 ### Customer
-- `/cart` Shopping cart
-- `/place-order` Checkout
-- `/profile` Edit profile + change password
+- `/books` - Browse and search books
+- `/books/:isbn` - Book details with reviews
+- `/cart` - Shopping cart
+- `/wishlist` - Saved books
+- `/my-orders` - Order history
+- `/my-orders/:orderId` - Order details with invoice download
+- `/profile` - Edit profile + change password
+- `/forgot-password` - Password recovery
+- `/reset-password` - Reset password form
 
 ### Admin
-- Admin users are redirected away from the Browse Books pages (`/books`, `/books/:isbn`) to the admin dashboard.
+- `/admin` - Dashboard
+- `/admin/books` - Manage books
+- `/admin/orders` - View orders
+- `/admin/publisher-orders` - Publisher orders
+- `/admin/publishers` - Manage publishers
+- `/admin/authors` - Manage authors
+- `/admin/reports` - Analytics
 
 
 ### Reset containers & volumes

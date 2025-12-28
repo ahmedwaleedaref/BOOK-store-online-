@@ -1,14 +1,17 @@
 import React from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { useQuery } from 'react-query'
-import { booksAPI } from '../services/api'
+import { useQuery, useMutation, useQueryClient } from 'react-query'
+import { FiHeart, FiShoppingCart } from 'react-icons/fi'
+import { booksAPI, wishlistAPI } from '../services/api'
 import Loading from '../components/Loading'
+import BookReviews from '../components/BookReviews'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
 
 const BookDetails = () => {
   const { isbn } = useParams()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { isAuthenticated, isCustomer } = useAuth()
   const { addToCart } = useCart()
 
@@ -21,7 +24,34 @@ const BookDetails = () => {
     enabled: !!isbn
   })
 
+  const { data: wishlistData } = useQuery(
+    ['wishlistCheck', isbn],
+    () => wishlistAPI.checkWishlist(isbn),
+    { enabled: isAuthenticated && isCustomer }
+  )
+
+  const addToWishlistMutation = useMutation(
+    () => wishlistAPI.addToWishlist(isbn),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['wishlistCheck', isbn])
+        queryClient.invalidateQueries('wishlist')
+      }
+    }
+  )
+
+  const removeFromWishlistMutation = useMutation(
+    () => wishlistAPI.removeFromWishlist(isbn),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['wishlistCheck', isbn])
+        queryClient.invalidateQueries('wishlist')
+      }
+    }
+  )
+
   const book = data?.data?.data
+  const inWishlist = wishlistData?.data?.data?.inWishlist
 
   if (isLoading) return <Loading />
 
@@ -91,14 +121,15 @@ const BookDetails = () => {
           </div>
         </div>
 
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex flex-wrap gap-3">
           {isAuthenticated && isCustomer ? (
             <>
               <button
                 type="button"
-                className="btn btn-primary"
+                className="btn btn-primary flex items-center gap-2"
                 onClick={() => addToCart(book.isbn, 1)}
               >
+                <FiShoppingCart />
                 Add to Cart
               </button>
               <button
@@ -111,6 +142,22 @@ const BookDetails = () => {
               >
                 Go to Cart
               </button>
+              <button
+                type="button"
+                className={`btn flex items-center gap-2 ${
+                  inWishlist
+                    ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                    : 'btn-secondary'
+                }`}
+                onClick={() =>
+                  inWishlist
+                    ? removeFromWishlistMutation.mutate()
+                    : addToWishlistMutation.mutate()
+                }
+              >
+                <FiHeart className={inWishlist ? 'fill-red-500' : ''} />
+                {inWishlist ? 'In Wishlist' : 'Add to Wishlist'}
+              </button>
             </>
           ) : (
             <Link to="/login" className="btn btn-primary">Login to buy</Link>
@@ -118,6 +165,9 @@ const BookDetails = () => {
           <Link to="/books" className="btn btn-secondary">Back</Link>
         </div>
       </div>
+
+      {/* Reviews Section */}
+      <BookReviews isbn={isbn} />
     </div>
   )
 }

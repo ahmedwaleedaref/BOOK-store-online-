@@ -10,6 +10,7 @@ const {
 
 router.get('/', bookController.getAllBooks);
 router.get('/categories', bookController.getCategories);
+router.get('/full-search', bookController.fullTextSearch);
 router.get('/category/:category', bookController.getBooksByCategory);
 router.get('/search', validateSearch, bookController.searchBooks);
 router.get('/:isbn', validateIsbn, bookController.getBookByIsbn);

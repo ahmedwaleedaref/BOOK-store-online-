@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from 'react-query'
+import { FiDownload } from 'react-icons/fi'
 import { ordersAPI } from '../services/api'
 import Loading from '../components/Loading'
 import { useAuth } from '../context/AuthContext'
@@ -21,6 +22,23 @@ const OrderDetails = () => {
   const payload = data?.data?.data
   const order = payload?.order
   const items = payload?.items || []
+
+  const handleDownloadInvoice = async () => {
+    try {
+      const response = await ordersAPI.downloadInvoice(orderId)
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `invoice-${orderId}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Failed to download invoice:', err)
+    }
+  }
 
   if (isLoading) return <Loading />
 
@@ -109,9 +127,16 @@ const OrderDetails = () => {
           </div>
         )}
 
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            onClick={handleDownloadInvoice}
+            className="btn btn-primary flex items-center gap-2"
+          >
+            <FiDownload />
+            Download Invoice
+          </button>
           <Link to="/my-orders" className="btn btn-secondary">Back</Link>
-          <Link to={isAdmin ? '/admin' : '/books'} className="btn btn-primary">
+          <Link to={isAdmin ? '/admin' : '/books'} className="btn btn-secondary">
             {isAdmin ? 'Admin Dashboard' : 'Browse Books'}
           </Link>
         </div>

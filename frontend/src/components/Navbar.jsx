@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FiBook, FiShoppingCart, FiUser, FiLogOut, FiMenu, FiX } from 'react-icons/fi'
+import { FiBook, FiShoppingCart, FiUser, FiLogOut, FiMenu, FiX, FiSearch, FiHeart } from 'react-icons/fi'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
 
@@ -8,11 +8,21 @@ const Navbar = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth()
   const { count } = useCart()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const navigate = useNavigate()
 
   const handleLogout = () => {
     logout()
     setMobileMenuOpen(false)
+  }
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      navigate(`/books?q=${encodeURIComponent(searchQuery.trim())}`)
+      setSearchQuery('')
+      setMobileMenuOpen(false)
+    }
   }
 
   return (
@@ -26,6 +36,24 @@ const Navbar = () => {
               <span className="text-xl font-bold text-gray-800">Bookstore</span>
             </Link>
           </div>
+
+          {/* Search Bar - Desktop */}
+          {(!isAuthenticated || !isAdmin) && (
+            <div className="hidden md:flex items-center flex-1 max-w-md mx-4">
+              <form onSubmit={handleSearch} className="w-full">
+                <div className="relative">
+                  <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search books..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+              </form>
+            </div>
+          )}
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
@@ -58,6 +86,13 @@ const Navbar = () => {
                       {count > 0 && (
                         <span className="ml-2 badge badge-info">{count}</span>
                       )}
+                    </Link>
+                    <Link
+                      to="/wishlist"
+                      className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
+                    >
+                      <FiHeart className="mr-1" />
+                      Wishlist
                     </Link>
                     <Link
                       to="/my-orders"
@@ -121,6 +156,22 @@ const Navbar = () => {
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t">
           <div className="px-2 pt-2 pb-3 space-y-1">
+            {/* Mobile Search */}
+            {(!isAuthenticated || !isAdmin) && (
+              <form onSubmit={handleSearch} className="px-3 py-2">
+                <div className="relative">
+                  <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search books..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+              </form>
+            )}
+
             {(!isAuthenticated || !isAdmin) && (
               <Link
                 to="/books"

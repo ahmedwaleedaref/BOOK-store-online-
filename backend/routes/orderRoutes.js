@@ -36,6 +36,14 @@ router.get(
 );
 
 router.get(
+  '/my-orders/:orderId/invoice',
+  authenticateToken,
+  requireCustomer,
+  validateId,
+  orderController.downloadInvoice
+);
+
+router.get(
   '/',
   authenticateToken,
   requireAdmin,

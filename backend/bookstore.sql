@@ -303,3 +303,60 @@ INSERT INTO PUBLISHER_ORDERS (book_isbn, publisher_id, order_quantity, status, c
 VALUES 
 ('9780345539434', 1, 50, 'pending', NULL);
 
+-- ============================================
+-- NEW FEATURES: Wishlist, Reviews, Password Reset
+-- ============================================
+
+-- 9. WISHLISTS Table
+CREATE TABLE WISHLISTS (
+    wishlist_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    book_isbn VARCHAR(20) NOT NULL,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_wishlist_item (user_id, book_isbn),
+    FOREIGN KEY (user_id) REFERENCES USERS(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (book_isbn) REFERENCES BOOKS(isbn) ON DELETE CASCADE
+);
+
+-- 10. BOOK_REVIEWS Table
+CREATE TABLE BOOK_REVIEWS (
+    review_id INT PRIMARY KEY AUTO_INCREMENT,
+    book_isbn VARCHAR(20) NOT NULL,
+    user_id INT NOT NULL,
+    rating TINYINT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    review_title VARCHAR(255),
+    review_text TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_user_review (book_isbn, user_id),
+    FOREIGN KEY (book_isbn) REFERENCES BOOKS(isbn) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES USERS(user_id) ON DELETE CASCADE
+);
+
+-- 11. PASSWORD_RESET_TOKENS Table
+CREATE TABLE PASSWORD_RESET_TOKENS (
+    token_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    expires_at TIMESTAMP NOT NULL,
+    used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES USERS(user_id) ON DELETE CASCADE
+);
+
+-- Sample Reviews
+INSERT INTO BOOK_REVIEWS (book_isbn, user_id, rating, review_title, review_text) VALUES
+('9780553380163', 2, 5, 'Mind-blowing!', 'Stephen Hawking makes complex physics accessible to everyone. A must-read for anyone curious about the universe.'),
+('9780553380163', 3, 4, 'Great but challenging', 'Excellent book but some parts require multiple reads to fully understand.'),
+('9780062316110', 2, 5, 'Changed my perspective', 'Yuval Noah Harari brilliantly traces the history of our species. Thought-provoking and well-researched.'),
+('9780062316110', 4, 5, 'Essential reading', 'Everyone should read this book. It will change how you see human history.'),
+('9780316346627', 3, 4, 'Insightful', 'Malcolm Gladwell presents fascinating case studies about success. Very engaging read.'),
+('9781524763138', 5, 5, 'Inspiring memoir', 'Michelle Obama shares her journey with grace and honesty. Truly inspiring.');
+
+-- Sample Wishlist items
+INSERT INTO WISHLISTS (user_id, book_isbn) VALUES
+(2, '9780345539434'),
+(2, '9780393354324'),
+(3, '9780062316110'),
+(4, '9780553380163');
+

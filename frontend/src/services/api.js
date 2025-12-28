@@ -46,6 +46,7 @@ export const booksAPI = {
   getAll: (params) => api.get('/books', { params }),
   getByIsbn: (isbn) => api.get(`/books/${isbn}`),
   search: (params) => api.get('/books/search', { params }),
+  fullSearch: (params) => api.get('/books/full-search', { params }),
   getByCategory: (category) => api.get(`/books/category/${category}`),
   getCategories: () => api.get('/books/categories'),
   create: (data) => api.post('/books', data),
@@ -56,10 +57,32 @@ export const ordersAPI = {
   placeOrder: (data) => api.post('/orders/place-order', data),
   getMyOrders: () => api.get('/orders/my-orders'),
   getOrderDetails: (orderId) => api.get(`/orders/my-orders/${orderId}`),
+  downloadInvoice: (orderId) => api.get(`/orders/my-orders/${orderId}/invoice`, { responseType: 'blob' }),
   getAllOrders: (params) => api.get('/orders', { params }),
   getPublisherOrders: (params) => api.get('/orders/publisher-orders', { params }),
   confirmPublisherOrder: (orderId) => api.put(`/orders/publisher-orders/${orderId}/confirm`),
   placePublisherOrder: (data) => api.post('/orders/publisher-orders', data)
+}
+
+export const wishlistAPI = {
+  getWishlist: () => api.get('/wishlist'),
+  addToWishlist: (isbn) => api.post('/wishlist', { isbn }),
+  removeFromWishlist: (isbn) => api.delete(`/wishlist/${isbn}`),
+  checkWishlist: (isbn) => api.get(`/wishlist/${isbn}`)
+}
+
+export const reviewsAPI = {
+  getBookReviews: (isbn, params) => api.get(`/reviews/book/${isbn}`, { params }),
+  createReview: (isbn, data) => api.post(`/reviews/book/${isbn}`, data),
+  deleteReview: (isbn) => api.delete(`/reviews/book/${isbn}`),
+  getUserReview: (isbn) => api.get(`/reviews/book/${isbn}/my-review`),
+  getRecommendations: () => api.get('/reviews/recommendations')
+}
+
+export const passwordResetAPI = {
+  requestReset: (email) => api.post('/password-reset/request', { email }),
+  verifyToken: (token) => api.get(`/password-reset/verify/${token}`),
+  resetPassword: (token, new_password) => api.post('/password-reset/reset', { token, new_password })
 }
 
 export const reportsAPI = {

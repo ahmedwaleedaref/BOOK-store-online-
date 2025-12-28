@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { authAPI } from '../services/api'
 
 const Login = () => {
-  const [formData, setFormData] = useState({ username: '', password: '' })
+  const [formData, setFormData] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -36,16 +36,17 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Username
+                Email
               </label>
               <div className="relative">
                 <FiMail className="absolute left-3 top-3 text-gray-400" />
                 <input
-                  type="text"
+                  type="email"
                   required
                   className="input pl-10"
-                  value={formData.username}
-                  onChange={(e) => setFormData({...formData, username: e.target.value})}
+                  placeholder="Enter your email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
                 />
               </div>
             </div>
@@ -60,6 +61,7 @@ const Login = () => {
                   type="password"
                   required
                   className="input pl-10"
+                  placeholder="Enter your password"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                 />
@@ -83,10 +85,16 @@ const Login = () => {
             </Link>
           </p>
 
+          <p className="mt-2 text-center text-sm">
+            <Link to="/forgot-password" className="text-gray-500 hover:text-primary-600">
+              Forgot your password?
+            </Link>
+          </p>
+
           <div className="mt-6 p-4 bg-gray-100 rounded-lg">
             <p className="text-xs text-gray-600 font-semibold mb-2">Demo Credentials:</p>
-            <p className="text-xs text-gray-600">Admin: admin / Admin123!</p>
-            <p className="text-xs text-gray-600">Customer: john_doe / Customer123!</p>
+            <p className="text-xs text-gray-600">Admin: admin@bookstore.com / Admin123!</p>
+            <p className="text-xs text-gray-600">Customer: john.doe@email.com / Customer123!</p>
           </div>
         </div>
       </div>

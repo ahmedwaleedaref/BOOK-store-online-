@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { query } = require('../config/database');
+const { sendWelcomeEmail } = require('../services/emailService');
 
 // Generate JWT token
 const generateToken = (userId, username, userType) => {
@@ -11,7 +12,7 @@ const generateToken = (userId, username, userType) => {
   );
 };
 
-// Register new customer (NO CART CREATION)
+// Register new customer
 const register = async (req, res, next) => {
   try {
     const {
@@ -28,7 +29,7 @@ const register = async (req, res, next) => {
     const saltRounds = parseInt(process.env.BCRYPT_ROUNDS) || 10;
     const password_hash = await bcrypt.hash(password, saltRounds);
 
-    // Insert new customer user (NO shopping cart creation)
+    // Insert new customer user
     const result = await query(
       `INSERT INTO USERS (username, password_hash, email, first_name, 
                           last_name, phone_number, address, user_type)
@@ -40,6 +41,11 @@ const register = async (req, res, next) => {
 
     // Generate token
     const token = generateToken(userId, username, 'customer');
+
+    // Send welcome email (async, don't wait)
+    sendWelcomeEmail({ email, first_name, username }).catch(err => 
+      console.error('Welcome email error:', err)
+    );
 
     res.status(201).json({
       success: true,
@@ -60,20 +66,20 @@ const register = async (req, res, next) => {
 // Login
 const login = async (req, res, next) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    // Get user from database
+    // Get user from database by email
     const users = await query(
       `SELECT user_id, username, password_hash, email, user_type
        FROM USERS 
-       WHERE username = ?`,
-      [username]
+       WHERE email = ?`,
+      [email]
     );
 
     if (users.length === 0) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid username or password'
+        message: 'Invalid email or password'
       });
     }
 
@@ -85,7 +91,7 @@ const login = async (req, res, next) => {
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid username or password'
+        message: 'Invalid email or password'
       });
     }
 
