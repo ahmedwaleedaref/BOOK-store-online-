@@ -6,18 +6,22 @@ jest.mock('../config/database', () => ({
   query: jest.fn()
 }));
 
+// Mock auth middleware to bypass JWT verification in tests
+jest.mock('../middleware/auth', () => ({
+  authenticateToken: (req, res, next) => {
+    req.user = { userId: 1, username: 'testuser', userType: 'customer' };
+    next();
+  },
+  requireAdmin: (req, res, next) => next(),
+  requireCustomer: (req, res, next) => next()
+}));
+
 const { query } = require('../config/database');
 
-// Create test app with auth
-const createTestApp = (userType = 'customer') => {
+// Create test app
+const createTestApp = () => {
   const app = express();
   app.use(express.json());
-  
-  app.use((req, res, next) => {
-    req.user = { userId: 1, username: 'testuser', userType };
-    next();
-  });
-  
   return app;
 };
 
