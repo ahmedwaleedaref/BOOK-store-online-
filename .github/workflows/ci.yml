@@ -91,7 +91,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./backend
-          file: ./docker/backend.Dockerfile
+          file: ./docker/Dockerfile.backend
           push: false
           tags: bookstore-backend:latest
 
@@ -99,7 +99,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
-          file: ./docker/frontend.Dockerfile
+          file: ./docker/Dockerfile.frontend
           push: false
           tags: bookstore-frontend:latest
 
