@@ -19,7 +19,12 @@ const Register = () => {
       toast.success('Registration successful! Please login.')
       navigate('/login')
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed')
+      const data = error.response?.data
+      if (data?.errors && data.errors.length > 0) {
+        data.errors.forEach(err => toast.error(err.msg))
+      } else {
+        toast.error(data?.message || 'Registration failed')
+      }
     } finally {
       setLoading(false)
     }
@@ -35,16 +40,19 @@ const Register = () => {
               <div>
                 <label className="block text-sm font-medium mb-1">Username *</label>
                 <input required className="input" value={formData.username}
+                  placeholder="3-50 chars, letters/numbers/underscores"
                   onChange={(e) => setFormData({...formData, username: e.target.value})} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Email *</label>
                 <input type="email" required className="input" value={formData.email}
+                  placeholder="your@email.com"
                   onChange={(e) => setFormData({...formData, email: e.target.value})} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Password *</label>
                 <input type="password" required className="input" value={formData.password}
+                  placeholder="Min 8 chars, uppercase, lowercase, number"
                   onChange={(e) => setFormData({...formData, password: e.target.value})} />
               </div>
               <div>
