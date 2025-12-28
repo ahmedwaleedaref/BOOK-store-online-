@@ -35,7 +35,7 @@ CREATE TABLE BOOKS (
     publisher_id INT NOT NULL,
     publication_year INT,
     price DECIMAL(10,2) NOT NULL CHECK (price > 0),
-    category ENUM('Science', 'Art', 'Religion', 'History', 'Geography') NOT NULL,
+    category ENUM('Science', 'Art', 'Religion', 'History', 'Geography', 'Self-Help', 'Fiction', 'Biography') NOT NULL,
     quantity_in_stock INT DEFAULT 0 CHECK (quantity_in_stock >= 0),
     threshold_quantity INT NOT NULL CHECK (threshold_quantity >= 0),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -272,6 +272,7 @@ INSERT INTO BOOKS (isbn, title, publisher_id, publication_year, price, category,
 ('9780399590504', 'Educated: A Memoir', 1, 2018, 28.00, 'History', 80, 15),
 ('9780062694690', 'A Peoples History of the United States', 2, 1980, 19.99, 'History', 40, 10),
 ('9780393354324', 'Guns, Germs, and Steel', 3, 1997, 26.99, 'History', 48, 10),
+('9780316346627', 'Outliers: The Story of Success', 3, 2008, 17.99, 'Self-Help', 60, 12),
 ('9780143038580', 'Team of Rivals', 1, 2005, 22.00, 'History', 35, 8),
 ('9780060838676', 'The Rise and Fall of the Third Reich', 3, 1960, 25.99, 'History', 28, 6),
 ('9780679720201', '1776', 3, 2005, 18.00, 'History', 42, 10),
@@ -297,7 +298,7 @@ INSERT INTO BOOKS (isbn, title, publisher_id, publication_year, price, category,
 ('9780316769488', 'The Catcher in the Rye', 3, 1951, 13.99, 'Art', 55, 12),
 ('9780679783268', 'Pride and Prejudice', 4, 1813, 12.99, 'Art', 40, 10),
 ('9780451524935', '1984', 1, 1949, 15.99, 'Art', 85, 18),
-('9780061120084', 'To Kill a Mockingbird', 2, 1960, 16.99, 'Art', 95, 20),
+('9780446310789', 'To Kill a Mockingbird', 2, 1960, 16.99, 'Art', 95, 20),
 ('9780743273565', 'The Great Gatsby', 3, 1925, 15.00, 'Art', 70, 15),
 ('9780141439600', 'Great Expectations', 1, 1861, 12.99, 'Art', 35, 8),
 ('9780140449136', 'Crime and Punishment', 1, 1866, 16.00, 'Art', 42, 10),
@@ -324,17 +325,12 @@ INSERT INTO BOOKS (isbn, title, publisher_id, publication_year, price, category,
 ('9780593321201', 'Tomorrow and Tomorrow and Tomorrow', 1, 2022, 28.00, 'Art', 70, 15),
 ('9781501161933', 'The Seven Husbands of Evelyn Hugo', 3, 2017, 17.00, 'Art', 90, 18),
 
--- Geography
-('9780393354324', 'Guns, Germs, and Steel', 3, 1997, 26.99, 'Geography', 48, 10),
-('9780062316097', 'Homo Deus', 2, 2017, 24.99, 'Geography', 55, 12),
-('9780374533557', 'Thinking, Fast and Slow', 4, 2011, 18.00, 'Geography', 60, 12),
-('9780316346627', 'Outliers: The Story of Success', 3, 2008, 17.99, 'Geography', 65, 14),
-('9780316017930', 'Outliers', 3, 2008, 18.99, 'Geography', 70, 15),
-('9780062457714', 'The Power of Habit', 1, 2012, 18.00, 'Geography', 75, 15),
-('9780525559474', 'Range: Why Generalists Triumph', 1, 2019, 17.99, 'Geography', 50, 10),
-('9780593135204', 'Think Again', 1, 2021, 28.00, 'Geography', 65, 14),
-('9780525429586', 'Deep Work', 1, 2016, 18.00, 'Geography', 55, 12),
-('9780143126560', 'Quiet: The Power of Introverts', 1, 2012, 18.00, 'Geography', 58, 12);
+-- Self-Help/Business
+('9780316017930', 'Outliers', 3, 2008, 18.99, 'Self-Help', 70, 15),
+('9780812981605', 'The Power of Habit', 1, 2012, 18.00, 'Self-Help', 75, 15),
+('9780593135204', 'Think Again', 1, 2021, 28.00, 'Self-Help', 65, 14),
+('9780525429586', 'Deep Work', 1, 2016, 18.00, 'Self-Help', 55, 12),
+('9780143126560', 'Quiet: The Power of Introverts', 1, 2012, 18.00, 'Self-Help', 58, 12);
 
 -- Link Books to Authors
 INSERT INTO BOOK_AUTHORS (book_isbn, author_id) VALUES
@@ -365,7 +361,7 @@ INSERT INTO BOOK_AUTHORS (book_isbn, author_id) VALUES
 ('9780316769488', 17), -- Catcher in the Rye - (using Hemingway placeholder)
 ('9780679783268', 15), -- Pride and Prejudice - Jane Austen
 ('9780451524935', 12), -- 1984 - George Orwell
-('9780061120084', 13), -- To Kill a Mockingbird - Harper Lee
+('9780446310789', 13), -- To Kill a Mockingbird - Harper Lee
 ('9780743273565', 14), -- The Great Gatsby - F. Scott Fitzgerald
 ('9780141439600', 18), -- Great Expectations - Charles Dickens
 ('9780140449136', 20), -- Crime and Punishment - Dostoevsky
@@ -389,10 +385,8 @@ INSERT INTO BOOK_AUTHORS (book_isbn, author_id) VALUES
 ('9781668001226', 44), -- It Starts with Us - Colleen Hoover
 ('9781501161933', 44), -- Seven Husbands - (using Hoover placeholder)
 
--- Geography/Self-help books
-('9780316346627', 3),  -- Outliers - Malcolm Gladwell
+-- Self-help books
 ('9780316017930', 3),  -- Outliers - Malcolm Gladwell
-('9780525559474', 50), -- Range - Adam Grant
 ('9780593135204', 50), -- Think Again - Adam Grant
 ('9780525429586', 46); -- Deep Work - Cal Newport
 
@@ -433,7 +427,7 @@ VALUES
 -- Order 4 (john_doe, 15 days ago - larger order)
 (4, '9780345539434', 3, 22.00),  -- Cosmos x3
 (4, '9780393354324', 2, 26.99),  -- Guns, Germs x2
-(4, '9780525478812', 1, 27.00),  -- Educated x1
+(4, '9780399590504', 1, 28.00),  -- Educated x1
 
 -- Order 5 (charlie_brown, 7 days ago)
 (5, '9780316769488', 2, 13.99),  -- Catcher x2
